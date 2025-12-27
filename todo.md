@@ -16,21 +16,26 @@ Interactive Canvas: A functional UI where users can see the slides and make live
 
 Text & Layout Controls: Ability to modify font size, color, alignment, and drag-and-drop text positioning555.
 
+
 Image Modification: Sliders or inputs for adjusting brightness, contrast, and background overlay opacity6.
 
+**DONE**
 Slide Management: Drag-and-drop functionality to reorder slides and a thumbnail preview for navigation7.
 
 3. Critical Technical Requirements (Passing Criteria)
 Functional Export/Download: A mechanism to save the final slideshow as a file (e.g., PNG or PDF) so it is no longer just "session-based".
 
-Image Replacement: A working search bar within the editor to swap out AI-suggested images for different stock photos.
-
+**DONE**
+Image Replacement: A working sesarch bar within the editor to swap out AI-suggested images for different stock photos.
+**STARTED**
 Cloud Architecture Evidence: A diagram showing how the frontend (Next.js), backend, and APIs (OpenAI, Pexels, Clerk) interact.
 
 4. Project Management & Process Evidence
 
+**GITHUB and maybe notes app**
 Version Control & Task Tracking: Evidence (like screenshots) of using GitHub for code management and a tool like Trello or Jira to track feature progress88.
 
-GenAI Implementation: Documentation of how you used AI to assist in coding or debugging the system9999.
+**CLAUDE CODE**
+GenAI Implementation: Documentation of how you used AI to assist in coding or debugging the system.
 
 Would you like me to help you draft the specific "User Stories" for these features to include in your Proposed Solution section?

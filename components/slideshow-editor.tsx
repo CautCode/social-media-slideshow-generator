@@ -86,7 +86,7 @@ export default function SlideshowEditor({ formData, slideshowData, onBack }: Sli
         textAlign: "center",
         brightness: 100,
         contrast: 100,
-        overlayOpacity: 40,
+        overlayOpacity: 0,
         padding: 20,
       }))
     } else {
@@ -107,7 +107,7 @@ export default function SlideshowEditor({ formData, slideshowData, onBack }: Sli
         textAlign: "center",
         brightness: 100,
         contrast: 100,
-        overlayOpacity: 40,
+        overlayOpacity: 0,
         padding: 20,
       }))
     }
