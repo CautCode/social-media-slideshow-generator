@@ -54,6 +54,7 @@ async function generateSlideshow(
         imageMetadata: undefined,
       })),
       suggestedImageKeywords: llmResponse.suggestedImageKeywords,
+      globalSuggestedImageTerm: llmResponse.globalSuggestedImageTerm,
     }
 
     return {
@@ -99,7 +100,7 @@ Create exactly ${formData.slideCount} slides. Each slide should:
 
 Slide 1 should hook the audience. Middle slides should deliver value. Final slide should include the call-to-action: "${formData.cta}"
 
-${formData.imageOption === "stock" && formData.imageVibe ? `Also suggest 3-5 image search keywords that match the vibe: "${formData.imageVibe}"` : `Also suggest 3-5 generic image search keywords for the slideshow.`}
+${formData.imageOption === "stock" && formData.imageVibe ? `Also suggest ${formData.slideCount} image search keywords (one per slide) that match the vibe: "${formData.imageVibe}"` : `Also suggest ${formData.slideCount} generic image search keywords for the slideshow (one per slide).`}
 
 ADDITIONALLY, provide ONE single global search term that captures the main theme of this entire slideshow. This should be a concise phrase (1-3 words) that represents the core visual concept for finding alternative images.
 
