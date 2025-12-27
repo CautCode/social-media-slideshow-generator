@@ -159,15 +159,27 @@ export default function SlideshowEditor({ formData, slideshowData, onBack }: Sli
     )
   }
 
-  // Mock image search results
+  // Mock image search results (fallback)
   const mockImages = [
     "/business-presentation.png",
     "/modern-office-space.png",
     "/team-collaboration.png",
-    "/technology-workspace.jpg",
-    "/abstract-creative-design.png",
-    "/professional-meeting.png",
   ]
+
+  // Use real suggested images if available, fallback to mock
+  const suggestedImages =
+    slideshowData?.suggestedReplacementImages && slideshowData.suggestedReplacementImages.length > 0
+      ? slideshowData.suggestedReplacementImages
+      : mockImages.map((url) => ({ url, photographer: undefined, photographerUrl: undefined, alt: undefined }))
+
+  // Debug logging
+  console.log("🖼️ Suggested Images Debug:", {
+    hasSlideshowData: !!slideshowData,
+    hasReplacementImages: !!slideshowData?.suggestedReplacementImages,
+    replacementImagesCount: slideshowData?.suggestedReplacementImages?.length || 0,
+    globalTerm: slideshowData?.globalSuggestedImageTerm,
+    usingMockImages: !slideshowData?.suggestedReplacementImages || slideshowData.suggestedReplacementImages.length === 0,
+  })
 
   const updateSlide = (updates: Partial<Slide>) => {
     setSlides((prev) => prev.map((slide, idx) => (idx === currentSlideIndex ? { ...slide, ...updates } : slide)))
@@ -261,8 +273,21 @@ export default function SlideshowEditor({ formData, slideshowData, onBack }: Sli
     setDraggedSlideIndex(null)
   }
 
-  const handleReplaceImage = (imageUrl: string) => {
-    updateSlide({ imageUrl })
+  const handleReplaceImage = (
+    imageUrl: string,
+    metadata?: { photographer?: string; photographerUrl?: string; alt?: string }
+  ) => {
+    updateSlide({
+      imageUrl,
+      imageMetadata: metadata
+        ? {
+            url: imageUrl,
+            photographer: metadata.photographer,
+            photographerUrl: metadata.photographerUrl,
+            alt: metadata.alt,
+          }
+        : undefined,
+    })
     setImageSearchOpen(false)
   }
 
@@ -706,17 +731,33 @@ export default function SlideshowEditor({ formData, slideshowData, onBack }: Sli
                         />
                       </div>
                       <div className="grid grid-cols-3 gap-2 max-h-[400px] overflow-y-auto">
-                        {mockImages.map((img, idx) => (
+                        {suggestedImages.map((img, idx) => (
                           <button
                             key={idx}
-                            onClick={() => handleReplaceImage(img)}
+                            onClick={() => {
+                              const imageUrl = typeof img === "string" ? img : img.url
+                              const metadata =
+                                typeof img === "string"
+                                  ? undefined
+                                  : {
+                                      photographer: img.photographer,
+                                      photographerUrl: img.photographerUrl,
+                                      alt: img.alt,
+                                    }
+                              handleReplaceImage(imageUrl, metadata)
+                            }}
                             className="relative aspect-video rounded-lg overflow-hidden border hover:ring-2 hover:ring-primary transition-all"
                           >
                             <img
-                              src={img || "/placeholder.svg"}
-                              alt={`Result ${idx + 1}`}
+                              src={(typeof img === "string" ? img : img.url) || "/placeholder.svg"}
+                              alt={typeof img === "string" ? `Result ${idx + 1}` : img.alt || `Result ${idx + 1}`}
                               className="w-full h-full object-cover"
                             />
+                            {typeof img !== "string" && img.photographer && (
+                              <div className="absolute bottom-0 left-0 right-0 bg-black/60 text-white text-xs p-1 truncate">
+                                by {img.photographer}
+                              </div>
+                            )}
                           </button>
                         ))}
                       </div>

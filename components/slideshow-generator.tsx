@@ -23,7 +23,7 @@ export default function SlideshowGenerator() {
   const [formData, setFormData] = useState<FormData>({
     promotion: "",
     audience: "",
-    imageOption: "none",
+    imageOption: "stock",
     imageVibe: "",
     uploadedFiles: [],
     tone: "Casual & Friendly",

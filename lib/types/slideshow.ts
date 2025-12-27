@@ -25,6 +25,7 @@ export type LLMSlideContent = z.infer<typeof LLMSlideContentSchema>
 export const LLMSlideshowResponseSchema = z.object({
   slides: z.array(LLMSlideContentSchema),
   suggestedImageKeywords: z.array(z.string()),
+  globalSuggestedImageTerm: z.string(),
 })
 
 export type LLMSlideshowResponse = z.infer<typeof LLMSlideshowResponseSchema>
@@ -45,6 +46,8 @@ export type SlideContent = z.infer<typeof SlideContentSchema>
 export const SlideshowResponseSchema = z.object({
   slides: z.array(SlideContentSchema),
   suggestedImageKeywords: z.array(z.string()),
+  globalSuggestedImageTerm: z.string().optional(),
+  suggestedReplacementImages: z.array(ImageMetadataSchema).optional(),
 })
 
 export type SlideshowResponse = z.infer<typeof SlideshowResponseSchema>

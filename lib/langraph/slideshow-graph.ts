@@ -101,6 +101,8 @@ Slide 1 should hook the audience. Middle slides should deliver value. Final slid
 
 ${formData.imageOption === "stock" && formData.imageVibe ? `Also suggest 3-5 image search keywords that match the vibe: "${formData.imageVibe}"` : `Also suggest 3-5 generic image search keywords for the slideshow.`}
 
+ADDITIONALLY, provide ONE single global search term that captures the main theme of this entire slideshow. This should be a concise phrase (1-3 words) that represents the core visual concept for finding alternative images.
+
 Generate the slideshow content now.`
 }
 
@@ -190,6 +192,63 @@ async function fetchImagesForSlides(
   }
 }
 
+// Node function: Fetch suggested replacement images using global term
+async function fetchSuggestedReplacementImages(
+  state: typeof GraphStateAnnotation.State
+): Promise<Partial<typeof GraphStateAnnotation.State>> {
+  const { slideshowContent, formData } = state
+
+  console.log("🔍 fetchSuggestedReplacementImages called:", {
+    hasSlideshowContent: !!slideshowContent,
+    imageOption: formData.imageOption,
+    globalTerm: slideshowContent?.globalSuggestedImageTerm,
+  })
+
+  // Only fetch if stock photos option is selected and we have a global term
+  if (
+    !slideshowContent ||
+    formData.imageOption !== "stock" ||
+    !slideshowContent.globalSuggestedImageTerm
+  ) {
+    console.log("⏭️ Skipping suggested images fetch (conditions not met)")
+    return {}
+  }
+
+  try {
+    // Fetch 3 images using the global suggested term
+    const searchQuery = formData.imageVibe
+      ? `${slideshowContent.globalSuggestedImageTerm} ${formData.imageVibe}`
+      : slideshowContent.globalSuggestedImageTerm
+
+    console.log("🔎 Fetching suggested images with query:", searchQuery)
+    const photos = await searchPexelsPhotos(searchQuery, 3)
+
+    // Convert to ImageMetadata format
+    const suggestedReplacementImages = photos.map((photo) => ({
+      url: photo.url,
+      photographer: photo.photographer,
+      photographerUrl: photo.photographerUrl,
+      alt: photo.alt,
+    }))
+
+    console.log("✅ Fetched", suggestedReplacementImages.length, "suggested images")
+
+    return {
+      slideshowContent: {
+        ...slideshowContent,
+        suggestedReplacementImages,
+      },
+      error: undefined,
+    }
+  } catch (error) {
+    console.error("Error fetching suggested replacement images:", error)
+    // Don't fail the whole workflow - just log and continue
+    return {
+      error: undefined, // Don't propagate error, suggested images are optional
+    }
+  }
+}
+
 // Build the graph
 export function createSlideshowGraph() {
   const workflow = new StateGraph(GraphStateAnnotation)
@@ -197,15 +256,17 @@ export function createSlideshowGraph() {
   // Add nodes
   workflow.addNode("generate", generateSlideshow)
   workflow.addNode("fetchImages", fetchImagesForSlides)
+  workflow.addNode("fetchSuggestedImages", fetchSuggestedReplacementImages)
 
   // Set entry point
   workflow.addEdge(START, "generate")
 
-  // Generate content first, then fetch images
+  // Generate content first, then fetch images, then fetch suggested images
   workflow.addEdge("generate", "fetchImages")
+  workflow.addEdge("fetchImages", "fetchSuggestedImages")
 
-  // Images to end
-  workflow.addEdge("fetchImages", END)
+  // Suggested images to end
+  workflow.addEdge("fetchSuggestedImages", END)
 
   return workflow.compile()
 }
