@@ -3,6 +3,7 @@
 import type React from "react"
 
 import { useState, useRef, useEffect } from "react"
+import { flushSync } from "react-dom"
 import { Button } from "@/components/ui/button"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Label } from "@/components/ui/label"
@@ -23,7 +24,7 @@ import {
 } from "lucide-react"
 import type { FormData } from "./slideshow-generator"
 import type { SlideshowResponse } from "@/lib/types/slideshow"
-import { exportSlideAsPNG } from "@/lib/utils/slide-export"
+import { exportSlideAsPNG, exportAllSlidesAsZip } from "@/lib/utils/slide-export"
 
 type Slide = {
   id: string
@@ -122,7 +123,24 @@ export default function SlideshowEditor({ formData, slideshowData, onBack }: Sli
   const [imageSearchOpen, setImageSearchOpen] = useState(false)
   const [searchQuery, setSearchQuery] = useState("")
   const [isExporting, setIsExporting] = useState(false)
+  const [isExportingAll, setIsExportingAll] = useState(false)
+  const [exportProgress, setExportProgress] = useState({ current: 0, total: 0 })
+  const [slideChangeTimestamp, setSlideChangeTimestamp] = useState(Date.now())
   const canvasRef = useRef<HTMLDivElement>(null)
+
+  // Regenerate slides when slideshowData or formData changes (new slideshow created)
+  useEffect(() => {
+    console.log('[SlideshowEditor] Slideshow data changed, regenerating slides')
+    const newSlides = generateSlides()
+    setSlides(newSlides)
+    setCurrentSlideIndex(0) // Reset to first slide
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [slideshowData, formData])
+
+  // Update timestamp when slide changes to force cache busting
+  useEffect(() => {
+    setSlideChangeTimestamp(Date.now())
+  }, [currentSlideIndex])
 
   const currentSlide = slides[currentSlideIndex]
 
@@ -273,6 +291,74 @@ export default function SlideshowEditor({ formData, slideshowData, onBack }: Sli
     }
   }
 
+  const handleExportAll = async () => {
+    console.log('[handleExportAll] Bulk export button clicked')
+
+    if (!canvasRef.current) {
+      console.error('[handleExportAll] Canvas ref not available')
+      return
+    }
+
+    setIsExportingAll(true)
+    setExportProgress({ current: 0, total: slides.length })
+
+    // Save current slide index to restore later
+    const originalSlideIndex = currentSlideIndex
+
+    try {
+      // Export all slides as ZIP
+      await exportAllSlidesAsZip(
+        () => {
+          if (!canvasRef.current) {
+            throw new Error('Canvas ref not available during export')
+          }
+          return canvasRef.current
+        },
+        slides.map((slide, index) => ({
+          slideNumber: index + 1,
+          headline: slide.headline,
+          imageUrl: slide.imageUrl,
+        })),
+        (progress) => {
+          console.log('[handleExportAll] Progress:', progress)
+          setExportProgress(progress)
+        },
+        async (slideIndex) => {
+          const imgBefore = canvasRef.current?.querySelector('img')
+          console.log('[DEBUG] BEFORE state change:')
+          console.log('  - Current img.src:', imgBefore?.src.substring(0, 100))
+          console.log('  - Expected imageUrl:', slides[slideIndex].imageUrl.substring(0, 100))
+
+          // Force React to immediately flush this state update to the DOM
+          flushSync(() => {
+            setCurrentSlideIndex(slideIndex)
+          })
+
+          // Wait for browser to paint the new content
+          await new Promise((resolve) => requestAnimationFrame(resolve))
+          await new Promise((resolve) => requestAnimationFrame(resolve)) // Double RAF for layout
+
+          const imgAfter = canvasRef.current?.querySelector('img')
+          console.log('[DEBUG] AFTER state change:')
+          console.log('  - New img.src:', imgAfter?.src.substring(0, 100))
+          console.log('  - Match:', imgAfter?.src.includes(slides[slideIndex].imageUrl))
+        }
+      )
+
+      console.log('[handleExportAll] Bulk export completed successfully')
+      alert(`Successfully exported all ${slides.length} slides as ZIP file!`)
+    } catch (error) {
+      console.error('[handleExportAll] Bulk export failed:', error)
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error'
+      alert(`Export failed: ${errorMessage}`)
+    } finally {
+      // Restore original slide
+      setCurrentSlideIndex(originalSlideIndex)
+      setIsExportingAll(false)
+      setExportProgress({ current: 0, total: 0 })
+    }
+  }
+
   return (
     <div className="h-screen flex flex-col bg-background">
       {/* Top Bar */}
@@ -285,14 +371,28 @@ export default function SlideshowEditor({ formData, slideshowData, onBack }: Sli
           <span className="text-sm font-medium">Slideshow Editor</span>
         </div>
         <div className="text-sm font-medium">
-          Slide {currentSlideIndex + 1} of {slides.length}
+          {isExportingAll
+            ? `Exporting slide ${exportProgress.current} of ${exportProgress.total}...`
+            : `Slide ${currentSlideIndex + 1} of ${slides.length}`}
         </div>
         <div className="flex items-center gap-2">
           <Button variant="outline" size="sm">
             Preview
           </Button>
-          <Button size="sm" onClick={handleExport} disabled={isExporting}>
-            {isExporting ? 'Exporting...' : 'Export →'}
+          <Button
+            size="sm"
+            onClick={handleExport}
+            disabled={isExporting || isExportingAll}
+          >
+            {isExporting ? 'Exporting...' : 'Export Current →'}
+          </Button>
+          <Button
+            size="sm"
+            variant="default"
+            onClick={handleExportAll}
+            disabled={isExporting || isExportingAll}
+          >
+            {isExportingAll ? `Exporting ${exportProgress.current}/${exportProgress.total}...` : 'Export All as ZIP ↓'}
           </Button>
         </div>
       </div>
@@ -331,9 +431,11 @@ export default function SlideshowEditor({ formData, slideshowData, onBack }: Sli
             >
             {/* Background Image */}
             <img
-              src={currentSlide.imageUrl || "/placeholder.svg"}
+              key={`slide-${currentSlideIndex}-${slideChangeTimestamp}`}
+              src={`${currentSlide.imageUrl || "/placeholder.svg"}${(currentSlide.imageUrl || "").includes('?') ? '&' : '?'}cb=${slideChangeTimestamp}`}
               alt="Slide background"
               className="w-full h-full object-cover"
+              crossOrigin="anonymous"
               style={{
                 filter: `brightness(${currentSlide.brightness}%) contrast(${currentSlide.contrast}%)`,
               }}
