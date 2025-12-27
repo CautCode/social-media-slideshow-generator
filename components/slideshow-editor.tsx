@@ -23,6 +23,7 @@ import {
 } from "lucide-react"
 import type { FormData } from "./slideshow-generator"
 import type { SlideshowResponse } from "@/lib/types/slideshow"
+import { exportSlideAsPNG } from "@/lib/utils/slide-export"
 
 type Slide = {
   id: string
@@ -76,16 +77,16 @@ export default function SlideshowEditor({ formData, slideshowData, onBack }: Sli
         bodyText: slide.bodyText,
         speakerNotes: slide.speakerNotes,
         imageMetadata: slide.imageMetadata,
-        textPosition: { x: 50, y: 400 },
-        textSize: { width: 700, height: 100 },
-        fontSize: 48,
+        textPosition: { x: 25, y: 200 },
+        textSize: { width: 350, height: 50 },
+        fontSize: 24,
         fontFamily: "Inter",
         textColor: "#ffffff",
         textAlign: "center",
         brightness: 100,
         contrast: 100,
         overlayOpacity: 40,
-        padding: 40,
+        padding: 20,
       }))
     } else {
       // Fallback to mock data
@@ -97,16 +98,16 @@ export default function SlideshowEditor({ formData, slideshowData, onBack }: Sli
         headline: i === 0 ? formData.promotion : `Slide ${i + 1} content`,
         bodyText: `Supporting text for ${formData.audience}`,
         speakerNotes: "",
-        textPosition: { x: 50, y: 400 },
-        textSize: { width: 700, height: 100 },
-        fontSize: 48,
+        textPosition: { x: 25, y: 200 },
+        textSize: { width: 350, height: 50 },
+        fontSize: 24,
         fontFamily: "Inter",
         textColor: "#ffffff",
         textAlign: "center",
         brightness: 100,
         contrast: 100,
         overlayOpacity: 40,
-        padding: 40,
+        padding: 20,
       }))
     }
   }
@@ -120,6 +121,7 @@ export default function SlideshowEditor({ formData, slideshowData, onBack }: Sli
   const [draggedSlideIndex, setDraggedSlideIndex] = useState<number | null>(null)
   const [imageSearchOpen, setImageSearchOpen] = useState(false)
   const [searchQuery, setSearchQuery] = useState("")
+  const [isExporting, setIsExporting] = useState(false)
   const canvasRef = useRef<HTMLDivElement>(null)
 
   const currentSlide = slides[currentSlideIndex]
@@ -138,37 +140,54 @@ export default function SlideshowEditor({ formData, slideshowData, onBack }: Sli
     setSlides((prev) => prev.map((slide, idx) => (idx === currentSlideIndex ? { ...slide, ...updates } : slide)))
   }
 
+  const getCanvasCoordinates = (e: MouseEvent | React.MouseEvent): { x: number; y: number } => {
+    if (!canvasRef.current) return { x: 0, y: 0 }
+
+    const rect = canvasRef.current.getBoundingClientRect()
+    const scaleX = 400 / rect.width
+    const scaleY = 400 / rect.height
+
+    const x = (e.clientX - rect.left) * scaleX
+    const y = (e.clientY - rect.top) * scaleY
+
+    return { x, y }
+  }
+
   const handleTextMouseDown = (e: React.MouseEvent) => {
     if ((e.target as HTMLElement).classList.contains("resize-handle")) {
       setIsResizing(true)
     } else {
       setIsDragging(true)
     }
-    setDragStart({ x: e.clientX, y: e.clientY })
+    setDragStart(getCanvasCoordinates(e))
   }
 
   useEffect(() => {
     const handleMouseMove = (e: MouseEvent) => {
       if (isDragging) {
-        const deltaX = e.clientX - dragStart.x
-        const deltaY = e.clientY - dragStart.y
+        const current = getCanvasCoordinates(e)
+        const deltaX = current.x - dragStart.x
+        const deltaY = current.y - dragStart.y
+
         updateSlide({
           textPosition: {
             x: currentSlide.textPosition.x + deltaX,
             y: currentSlide.textPosition.y + deltaY,
           },
         })
-        setDragStart({ x: e.clientX, y: e.clientY })
+        setDragStart(current)
       } else if (isResizing) {
-        const deltaX = e.clientX - dragStart.x
-        const deltaY = e.clientY - dragStart.y
+        const current = getCanvasCoordinates(e)
+        const deltaX = current.x - dragStart.x
+        const deltaY = current.y - dragStart.y
+
         updateSlide({
           textSize: {
-            width: Math.max(200, currentSlide.textSize.width + deltaX),
-            height: Math.max(50, currentSlide.textSize.height + deltaY),
+            width: Math.max(100, currentSlide.textSize.width + deltaX),
+            height: Math.max(25, currentSlide.textSize.height + deltaY),
           },
         })
-        setDragStart({ x: e.clientX, y: e.clientY })
+        setDragStart(current)
       }
     }
 
@@ -216,11 +235,42 @@ export default function SlideshowEditor({ formData, slideshowData, onBack }: Sli
 
   const setTextPreset = (preset: "top" | "center" | "bottom") => {
     const positions = {
-      top: { x: 50, y: 100 },
-      center: { x: 50, y: 300 },
-      bottom: { x: 50, y: 500 },
+      top: { x: 25, y: 50 },
+      center: { x: 25, y: 150 },
+      bottom: { x: 25, y: 250 },
     }
     updateSlide({ textPosition: positions[preset] })
+  }
+
+  const handleExport = async () => {
+    console.log('[handleExport] Export button clicked')
+    console.log('[handleExport] canvasRef.current:', canvasRef.current)
+    console.log('[handleExport] currentSlideIndex:', currentSlideIndex)
+    console.log('[handleExport] currentSlide:', currentSlide)
+
+    if (!canvasRef.current) {
+      console.error('[handleExport] Canvas ref not available')
+      return
+    }
+
+    console.log('[handleExport] Setting isExporting to true')
+    setIsExporting(true)
+
+    try {
+      console.log('[handleExport] Calling exportSlideAsPNG...')
+      await exportSlideAsPNG(canvasRef.current, {
+        slideNumber: currentSlideIndex + 1,
+        headline: currentSlide.headline,
+        imageUrl: currentSlide.imageUrl,
+      })
+      console.log('[handleExport] Export completed successfully')
+    } catch (error) {
+      console.error('[handleExport] Export failed:', error)
+      alert('Failed to export slide. Please try again.')
+    } finally {
+      console.log('[handleExport] Setting isExporting to false')
+      setIsExporting(false)
+    }
   }
 
   return (
@@ -241,35 +291,44 @@ export default function SlideshowEditor({ formData, slideshowData, onBack }: Sli
           <Button variant="outline" size="sm">
             Preview
           </Button>
-          <Button size="sm">Export →</Button>
+          <Button size="sm" onClick={handleExport} disabled={isExporting}>
+            {isExporting ? 'Exporting...' : 'Export →'}
+          </Button>
         </div>
       </div>
 
       {/* Main Content */}
       <div className="flex-1 flex overflow-hidden">
         {/* Center: Canvas */}
-        <div className="flex-1 flex flex-col items-center justify-center bg-muted/10 p-8 overflow-auto">
-          {/* Zoom Slider */}
-          <div className="mb-4 flex items-center gap-4 w-64">
-            <span className="text-sm font-medium text-muted-foreground whitespace-nowrap">Zoom: {zoom}%</span>
+        <div className="flex-1 flex flex-col items-center justify-center bg-muted/10 p-8 overflow-auto relative">
+          {/* Zoom Slider - Sticky */}
+          <div className="absolute top-3 left-3 z-10 flex items-center gap-2 bg-background/95 backdrop-blur-sm border border-border rounded-md px-3 py-1.5 shadow-md">
+            <span className="text-xs font-medium whitespace-nowrap">Zoom: {zoom}%</span>
             <Slider
               value={[zoom]}
               onValueChange={([value]) => setZoom(value)}
               min={25}
               max={200}
               step={5}
-              className="flex-1"
+              className="w-24"
             />
           </div>
 
           <div
-            ref={canvasRef}
-            className="relative bg-white rounded-lg shadow-2xl overflow-hidden"
+            className="rounded-lg shadow-2xl overflow-hidden"
             style={{
-              width: `${(800 * zoom) / 100}px`,
-              height: `${(800 * zoom) / 100}px`,
+              transform: `scale(${zoom / 100})`,
+              transformOrigin: 'center center'
             }}
           >
+            <div
+              ref={canvasRef}
+              className="relative bg-white overflow-hidden"
+              style={{
+                width: '400px',
+                height: '400px',
+              }}
+            >
             {/* Background Image */}
             <img
               src={currentSlide.imageUrl || "/placeholder.svg"}
@@ -288,6 +347,7 @@ export default function SlideshowEditor({ formData, slideshowData, onBack }: Sli
 
             {/* Grid Overlay */}
             <div
+              data-exclude-from-export
               className="absolute inset-0 pointer-events-none"
               style={{
                 backgroundImage:
@@ -300,15 +360,22 @@ export default function SlideshowEditor({ formData, slideshowData, onBack }: Sli
             <div
               className="absolute cursor-move group"
               style={{
-                left: `${(currentSlide.textPosition.x * zoom) / 100}px`,
-                top: `${(currentSlide.textPosition.y * zoom) / 100}px`,
-                width: `${(currentSlide.textSize.width * zoom) / 100}px`,
-                height: `${(currentSlide.textSize.height * zoom) / 100}px`,
+                left: `${currentSlide.textPosition.x}px`,
+                top: `${currentSlide.textPosition.y}px`,
+                width: `${currentSlide.textSize.width}px`,
+                height: `${currentSlide.textSize.height}px`,
               }}
               onMouseDown={handleTextMouseDown}
             >
+              {/* Dashed border (editing UI only) */}
               <div
-                className="w-full h-full flex items-center justify-center border-2 border-dashed border-primary/50 group-hover:border-primary transition-colors"
+                data-exclude-from-export
+                className="absolute inset-0 border-2 border-dashed border-primary/50 group-hover:border-primary transition-colors pointer-events-none"
+              />
+
+              {/* Text content (included in export) */}
+              <div
+                className="w-full h-full flex items-center justify-center"
                 style={{
                   padding: `${currentSlide.padding}px`,
                 }}
@@ -316,7 +383,7 @@ export default function SlideshowEditor({ formData, slideshowData, onBack }: Sli
                 <p
                   className="w-full"
                   style={{
-                    fontSize: `${(currentSlide.fontSize * zoom) / 100}px`,
+                    fontSize: `${currentSlide.fontSize}px`,
                     fontFamily: currentSlide.fontFamily,
                     color: currentSlide.textColor,
                     textAlign: currentSlide.textAlign,
@@ -326,9 +393,11 @@ export default function SlideshowEditor({ formData, slideshowData, onBack }: Sli
                   {currentSlide.text}
                 </p>
               </div>
+
               {/* Resize Handle */}
-              <div className="resize-handle absolute bottom-0 right-0 w-4 h-4 bg-primary rounded-tl cursor-nwse-resize opacity-0 group-hover:opacity-100 transition-opacity" />
+              <div data-exclude-from-export className="resize-handle absolute bottom-0 right-0 w-4 h-4 bg-primary rounded-tl cursor-nwse-resize opacity-0 group-hover:opacity-100 transition-opacity" />
             </div>
+          </div>
           </div>
         </div>
 
