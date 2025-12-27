@@ -48,6 +48,8 @@ type Slide = {
   contrast: number
   overlayOpacity: number
   padding: number
+  textBorderWidth: number
+  textBorderColor: string
 }
 
 type SlideshowEditorProps = {
@@ -88,6 +90,8 @@ export default function SlideshowEditor({ formData, slideshowData, onBack }: Sli
         contrast: 100,
         overlayOpacity: 0,
         padding: 20,
+        textBorderWidth: 0,
+        textBorderColor: "#000000",
       }))
     } else {
       // Fallback to mock data
@@ -109,6 +113,8 @@ export default function SlideshowEditor({ formData, slideshowData, onBack }: Sli
         contrast: 100,
         overlayOpacity: 0,
         padding: 20,
+        textBorderWidth: 0,
+        textBorderColor: "#000000",
       }))
     }
   }
@@ -143,6 +149,15 @@ export default function SlideshowEditor({ formData, slideshowData, onBack }: Sli
   }, [currentSlideIndex])
 
   const currentSlide = slides[currentSlideIndex]
+
+  // Return early if no slide is available
+  if (!currentSlide) {
+    return (
+      <div className="h-screen flex items-center justify-center bg-background">
+        <p className="text-muted-foreground">Loading slides...</p>
+      </div>
+    )
+  }
 
   // Mock image search results
   const mockImages = [
@@ -490,6 +505,10 @@ export default function SlideshowEditor({ formData, slideshowData, onBack }: Sli
                     color: currentSlide.textColor,
                     textAlign: currentSlide.textAlign,
                     lineHeight: 1.2,
+                    WebkitTextStroke: currentSlide.textBorderWidth > 0
+                      ? `${currentSlide.textBorderWidth}px ${currentSlide.textBorderColor}`
+                      : 'none',
+                    paintOrder: 'stroke fill',
                   }}
                 >
                   {currentSlide.text}
@@ -531,14 +550,19 @@ export default function SlideshowEditor({ formData, slideshowData, onBack }: Sli
                 </div>
 
                 <div className="space-y-2">
-                  <Label>Font Size: {currentSlide.fontSize}px</Label>
-                  <Slider
-                    value={[currentSlide.fontSize]}
-                    onValueChange={([value]) => updateSlide({ fontSize: value })}
-                    min={16}
-                    max={120}
-                    step={2}
-                  />
+                  <Label>Font Size</Label>
+                  <div className="flex items-center gap-2">
+                    <Input
+                      type="number"
+                      value={currentSlide.fontSize}
+                      onChange={(e) => updateSlide({ fontSize: Number(e.target.value) })}
+                      min={16}
+                      max={120}
+                      step={2}
+                      className="w-24"
+                    />
+                    <span className="text-sm text-muted-foreground">px</span>
+                  </div>
                 </div>
 
                 <div className="space-y-2">
@@ -586,6 +610,40 @@ export default function SlideshowEditor({ formData, slideshowData, onBack }: Sli
                     >
                       <AlignRight className="h-4 w-4" />
                     </Button>
+                  </div>
+                </div>
+
+                <div className="space-y-2">
+                  <Label>Text Border Width</Label>
+                  <div className="flex items-center gap-2">
+                    <Input
+                      type="number"
+                      value={currentSlide.textBorderWidth}
+                      onChange={(e) => updateSlide({ textBorderWidth: Number(e.target.value) })}
+                      min={0}
+                      max={10}
+                      step={1}
+                      className="w-24"
+                    />
+                    <span className="text-sm text-muted-foreground">px</span>
+                  </div>
+                </div>
+
+                <div className="space-y-2">
+                  <Label>Text Border Color</Label>
+                  <div className="flex gap-2">
+                    <Input
+                      type="color"
+                      value={currentSlide.textBorderColor}
+                      onChange={(e) => updateSlide({ textBorderColor: e.target.value })}
+                      className="w-16 h-10 p-1 cursor-pointer"
+                    />
+                    <Input
+                      type="text"
+                      value={currentSlide.textBorderColor}
+                      onChange={(e) => updateSlide({ textBorderColor: e.target.value })}
+                      className="flex-1"
+                    />
                   </div>
                 </div>
 
