@@ -22,11 +22,20 @@ import {
   Search,
 } from "lucide-react"
 import type { FormData } from "./slideshow-generator"
+import type { SlideshowResponse } from "@/lib/types/slideshow"
 
 type Slide = {
   id: string
   imageUrl: string
   text: string
+  headline: string
+  bodyText: string
+  speakerNotes: string
+  imageMetadata?: {
+    photographer?: string
+    photographerUrl?: string
+    alt?: string
+  }
   textPosition: { x: number; y: number }
   textSize: { width: number; height: number }
   fontSize: number
@@ -41,10 +50,11 @@ type Slide = {
 
 type SlideshowEditorProps = {
   formData: FormData
+  slideshowData: SlideshowResponse | null
   onBack: () => void
 }
 
-export default function SlideshowEditor({ formData, onBack }: SlideshowEditorProps) {
+export default function SlideshowEditor({ formData, slideshowData, onBack }: SlideshowEditorProps) {
   const defaultImages = [
     "/business-presentation.png",
     "/modern-office-space.png",
@@ -54,24 +64,51 @@ export default function SlideshowEditor({ formData, onBack }: SlideshowEditorPro
     "/professional-meeting.png",
   ]
 
-  // Generate mock slides based on form data
+  // Generate slides from API data or mock data
   const generateSlides = (): Slide[] => {
-    const count = Number.parseInt(formData.slideCount)
-    return Array.from({ length: count }, (_, i) => ({
-      id: `slide-${i + 1}`,
-      imageUrl: defaultImages[i % defaultImages.length],
-      text: i === 0 ? formData.promotion : `Slide ${i + 1} content for ${formData.audience}`,
-      textPosition: { x: 50, y: 400 },
-      textSize: { width: 700, height: 100 },
-      fontSize: 48,
-      fontFamily: "Inter",
-      textColor: "#ffffff",
-      textAlign: "center",
-      brightness: 100,
-      contrast: 100,
-      overlayOpacity: 40,
-      padding: 40,
-    }))
+    if (slideshowData && slideshowData.slides) {
+      // Use real data from API
+      return slideshowData.slides.map((slide, i) => ({
+        id: `slide-${slide.slideNumber}`,
+        imageUrl: slide.imageUrl || defaultImages[i % defaultImages.length],
+        text: slide.headline,
+        headline: slide.headline,
+        bodyText: slide.bodyText,
+        speakerNotes: slide.speakerNotes,
+        imageMetadata: slide.imageMetadata,
+        textPosition: { x: 50, y: 400 },
+        textSize: { width: 700, height: 100 },
+        fontSize: 48,
+        fontFamily: "Inter",
+        textColor: "#ffffff",
+        textAlign: "center",
+        brightness: 100,
+        contrast: 100,
+        overlayOpacity: 40,
+        padding: 40,
+      }))
+    } else {
+      // Fallback to mock data
+      const count = Number.parseInt(formData.slideCount)
+      return Array.from({ length: count }, (_, i) => ({
+        id: `slide-${i + 1}`,
+        imageUrl: defaultImages[i % defaultImages.length],
+        text: i === 0 ? formData.promotion : `Slide ${i + 1} content for ${formData.audience}`,
+        headline: i === 0 ? formData.promotion : `Slide ${i + 1} content`,
+        bodyText: `Supporting text for ${formData.audience}`,
+        speakerNotes: "",
+        textPosition: { x: 50, y: 400 },
+        textSize: { width: 700, height: 100 },
+        fontSize: 48,
+        fontFamily: "Inter",
+        textColor: "#ffffff",
+        textAlign: "center",
+        brightness: 100,
+        contrast: 100,
+        overlayOpacity: 40,
+        padding: 40,
+      }))
+    }
   }
 
   const [slides, setSlides] = useState<Slide[]>(generateSlides())
@@ -402,6 +439,20 @@ export default function SlideshowEditor({ formData, onBack }: SlideshowEditorPro
                       className="w-full h-full object-cover"
                     />
                   </div>
+                  {currentSlide.imageMetadata && currentSlide.imageMetadata.photographer && (
+                    <p className="text-xs text-muted-foreground">
+                      Photo by{" "}
+                      <a
+                        href={currentSlide.imageMetadata.photographerUrl}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="underline hover:text-foreground"
+                      >
+                        {currentSlide.imageMetadata.photographer}
+                      </a>{" "}
+                      on Pexels
+                    </p>
+                  )}
                 </div>
 
                 <Dialog open={imageSearchOpen} onOpenChange={setImageSearchOpen}>

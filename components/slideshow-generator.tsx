@@ -4,6 +4,7 @@ import { useState } from "react"
 import SlideshowForm from "./slideshow-form"
 import SlideshowSummary from "./slideshow-summary"
 import SlideshowEditor from "./slideshow-editor"
+import type { SlideshowResponse } from "@/lib/types/slideshow"
 
 export type FormData = {
   promotion: string
@@ -30,6 +31,7 @@ export default function SlideshowGenerator() {
     slideCount: "7",
     template: "Informational",
   })
+  const [generatedSlideshow, setGeneratedSlideshow] = useState<SlideshowResponse | null>(null)
 
   const handleStepChange = (newStep: 1 | 2 | 3 | 4, data: FormData) => {
     setFormData(data)
@@ -63,18 +65,19 @@ export default function SlideshowGenerator() {
       if (result.success) {
         console.log("✅ Slideshow generated successfully!")
         console.log("Generated content:", result.data)
+        setGeneratedSlideshow(result.data)
+        setStep(4)
       } else {
         console.error("❌ Generation failed:", result.error)
         if (result.details) {
           console.error("Error details:", result.details)
         }
+        // TODO: Show error to user
       }
     } catch (error) {
       console.error("❌ API call failed:", error)
+      // TODO: Show error to user
     }
-
-    // Navigate to editor (with mock data for now)
-    setStep(4)
   }
 
   const handleBackFromEditor = () => {
@@ -89,7 +92,9 @@ export default function SlideshowGenerator() {
       {step === 3 && (
         <SlideshowSummary data={formData} onBack={handleBack} onEdit={handleEdit} onGenerate={handleGenerate} />
       )}
-      {step === 4 && <SlideshowEditor formData={formData} onBack={handleBackFromEditor} />}
+      {step === 4 && (
+        <SlideshowEditor formData={formData} slideshowData={generatedSlideshow} onBack={handleBackFromEditor} />
+      )}
     </>
   )
 }

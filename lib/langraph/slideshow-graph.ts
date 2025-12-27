@@ -2,10 +2,12 @@ import { StateGraph, END, START, Annotation } from "@langchain/langgraph"
 import { BaseMessage, HumanMessage } from "@langchain/core/messages"
 import { ChatOpenAI } from "@langchain/openai"
 import {
-  SlideshowResponseSchema,
+  LLMSlideshowResponseSchema,
   type GenerateSlideshowRequest,
   type SlideshowResponse,
+  type LLMSlideshowResponse,
 } from "@/lib/types/slideshow"
+import { searchPexelsPhotos } from "@/lib/apis/pexels"
 
 // Define the state annotation for our graph
 const GraphStateAnnotation = Annotation.Root({
@@ -26,10 +28,10 @@ function createLLM() {
   })
 }
 
-// Create LLM with structured output
+// Create LLM with structured output (using LLM schema without image fields)
 function createStructuredLLM() {
   const llm = createLLM()
-  return llm.withStructuredOutput(SlideshowResponseSchema)
+  return llm.withStructuredOutput(LLMSlideshowResponseSchema)
 }
 
 // Node function: Generate slideshow content
@@ -41,10 +43,21 @@ async function generateSlideshow(
     const prompt = buildPrompt(formData)
 
     const structuredLLM = createStructuredLLM()
-    const response = await structuredLLM.invoke([new HumanMessage(prompt)])
+    const llmResponse = (await structuredLLM.invoke([new HumanMessage(prompt)])) as LLMSlideshowResponse
+
+    // Convert LLM response to full SlideshowResponse format
+    // Image fields will be added later by the fetchImagesForSlides node
+    const slideshowContent: SlideshowResponse = {
+      slides: llmResponse.slides.map((slide) => ({
+        ...slide,
+        imageUrl: undefined,
+        imageMetadata: undefined,
+      })),
+      suggestedImageKeywords: llmResponse.suggestedImageKeywords,
+    }
 
     return {
-      slideshowContent: response as SlideshowResponse,
+      slideshowContent,
       error: undefined,
     }
   } catch (error) {
@@ -107,18 +120,92 @@ function getTemplateGuidance(template: string): string {
   return guidance[template] || ""
 }
 
+// Node function: Fetch images for slides from Pexels
+async function fetchImagesForSlides(
+  state: typeof GraphStateAnnotation.State
+): Promise<Partial<typeof GraphStateAnnotation.State>> {
+  const { slideshowContent, formData } = state
+
+  // Only fetch images if stock photos option is selected
+  if (!slideshowContent || formData.imageOption !== "stock") {
+    return {}
+  }
+
+  try {
+    // Fetch images for each slide using suggested keywords or headlines
+    const imageResults = await Promise.all(
+      slideshowContent.slides.map(async (slide, index) => {
+        try {
+          // Use suggested keywords if available, otherwise fall back to headline
+          const query =
+            slideshowContent.suggestedImageKeywords[index] ||
+            slide.headline ||
+            formData.promotion
+
+          // Add image vibe to query if provided
+          const searchQuery = formData.imageVibe
+            ? `${query} ${formData.imageVibe}`
+            : query
+
+          const photos = await searchPexelsPhotos(searchQuery, 1)
+
+          if (photos.length > 0) {
+            return {
+              imageUrl: photos[0].url,
+              imageMetadata: {
+                url: photos[0].url,
+                photographer: photos[0].photographer,
+                photographerUrl: photos[0].photographerUrl,
+                alt: photos[0].alt,
+              },
+            }
+          }
+
+          return { imageUrl: undefined, imageMetadata: undefined }
+        } catch (error) {
+          console.error(`Error fetching image for slide ${index + 1}:`, error)
+          return { imageUrl: undefined, imageMetadata: undefined }
+        }
+      })
+    )
+
+    // Update slides with image URLs and metadata
+    const updatedSlides = slideshowContent.slides.map((slide, index) => ({
+      ...slide,
+      ...imageResults[index],
+    }))
+
+    return {
+      slideshowContent: {
+        ...slideshowContent,
+        slides: updatedSlides,
+      },
+      error: undefined,
+    }
+  } catch (error) {
+    console.error("Error in fetchImagesForSlides node:", error)
+    return {
+      error: error instanceof Error ? error.message : "Failed to fetch images",
+    }
+  }
+}
+
 // Build the graph
 export function createSlideshowGraph() {
   const workflow = new StateGraph(GraphStateAnnotation)
 
-  // Add the single node
+  // Add nodes
   workflow.addNode("generate", generateSlideshow)
+  workflow.addNode("fetchImages", fetchImagesForSlides)
 
   // Set entry point
   workflow.addEdge(START, "generate")
 
-  // Define edge to end
-  workflow.addEdge("generate", END)
+  // Generate content first, then fetch images
+  workflow.addEdge("generate", "fetchImages")
+
+  // Images to end
+  workflow.addEdge("fetchImages", END)
 
   return workflow.compile()
 }
