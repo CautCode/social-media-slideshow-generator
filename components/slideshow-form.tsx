@@ -105,7 +105,9 @@ export default function SlideshowForm({ initialData, currentStep, onStepChange }
       <div className="max-w-[680px] mx-auto">
         {/* Logo */}
         <div className="text-center mb-8">
-          <h1 className="text-3xl font-bold tracking-tight text-foreground">Social Media Slideshow Generator</h1>
+          <h1 className="text-3xl font-black tracking-tight text-foreground italic font-[family-name:var(--font-tiktok-sans)]">
+            SlideGen
+          </h1>
         </div>
 
         {/* Progress Indicator */}

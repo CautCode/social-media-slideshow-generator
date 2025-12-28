@@ -53,7 +53,9 @@ FINAL FEATURES:
 * STYLING UPGRADE WITH LANDING PAGE
 * add loading after creating the slideshow
 * fix the rounded corners issue
-* 
+* fix the landing page
+* make the prompts better (use better vocab, use shorter sentences)
+* finish proper stylisation of everything
 
 
 slideshow examples:

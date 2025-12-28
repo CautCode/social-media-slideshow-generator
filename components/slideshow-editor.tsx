@@ -424,12 +424,14 @@ export default function SlideshowEditor({ formData, slideshowData, onBack }: Sli
     <div className="h-screen flex flex-col bg-background">
       {/* Top Bar */}
       <div className="h-14 border-b border-border flex items-center justify-between px-4">
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-4">
           <Button variant="ghost" size="sm" onClick={onBack}>
             <ChevronLeft className="h-4 w-4 mr-1" />
             Back
           </Button>
-          <span className="text-sm font-medium">Slideshow Editor</span>
+          <span className="text-xl font-black tracking-tight text-foreground italic font-[family-name:var(--font-tiktok-sans)]">
+            SlideGen
+          </span>
         </div>
         <div className="text-sm font-medium">
           {isExportingAll
@@ -597,8 +599,9 @@ export default function SlideshowEditor({ formData, slideshowData, onBack }: Sli
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
+                      <SelectItem value="Roboto">Roboto</SelectItem>
                       <SelectItem value="TikTok Sans">TikTok Sans</SelectItem>
-                      <SelectItem value="Inter">Inter</SelectItem>
+                      <SelectItem value="Roboto Mono">Roboto Mono</SelectItem>
                       <SelectItem value="Arial">Arial</SelectItem>
                       <SelectItem value="Georgia">Georgia</SelectItem>
                       <SelectItem value="Times New Roman">Times New Roman</SelectItem>

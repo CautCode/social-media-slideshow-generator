@@ -1,10 +1,21 @@
 import type { Metadata } from 'next'
-import { Geist, Geist_Mono, TikTok_Sans } from 'next/font/google'
+import { Roboto, Roboto_Mono, TikTok_Sans } from 'next/font/google'
 import { Analytics } from '@vercel/analytics/next'
+import { ThemeProvider } from '@/components/theme-provider'
+import { ThemeToggle } from '@/components/theme-toggle'
 import './globals.css'
 
-const geist = Geist({ subsets: ["latin"] })
-const geistMono = Geist_Mono({ subsets: ["latin"] })
+const roboto = Roboto({
+  weight: ['300', '400', '500', '700', '900'],
+  subsets: ["latin"],
+  display: 'swap',
+  variable: '--font-roboto',
+})
+const robotoMono = Roboto_Mono({
+  subsets: ["latin"],
+  display: 'swap',
+  variable: '--font-roboto-mono',
+})
 const tiktokSans = TikTok_Sans({
   subsets: ["latin"],
   display: 'swap',
@@ -39,10 +50,18 @@ export default function RootLayout({
   children: React.ReactNode
 }>) {
   return (
-    <html lang="en" className={`${geist.variable} ${geistMono.variable} ${tiktokSans.variable}`}>
-      <body className={`font-sans antialiased`}>
-        {children}
-        <Analytics />
+    <html lang="en" className={`${roboto.variable} ${robotoMono.variable} ${tiktokSans.variable}`} suppressHydrationWarning>
+      <body className={`${roboto.className} antialiased`}>
+        <ThemeProvider
+          attribute="class"
+          defaultTheme="dark"
+          enableSystem
+          disableTransitionOnChange
+        >
+          <ThemeToggle />
+          {children}
+          <Analytics />
+        </ThemeProvider>
       </body>
     </html>
   )
