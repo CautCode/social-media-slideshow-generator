@@ -607,6 +607,7 @@ export default function SlideshowEditor({ formData, slideshowData, onBack }: Sli
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
+                      <SelectItem value="TikTok Sans">TikTok Sans</SelectItem>
                       <SelectItem value="Inter">Inter</SelectItem>
                       <SelectItem value="Arial">Arial</SelectItem>
                       <SelectItem value="Georgia">Georgia</SelectItem>
