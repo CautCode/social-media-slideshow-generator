@@ -84,14 +84,14 @@ export default function SlideshowEditor({ formData, slideshowData, onBack }: Sli
         textPosition: { x: 25, y: 200 },
         textSize: { width: 350, height: 50 },
         fontSize: 24,
-        fontFamily: "Inter",
+        fontFamily: "TikTok Sans",
         textColor: "#ffffff",
         textAlign: "center",
         brightness: 100,
         contrast: 100,
         overlayOpacity: 0,
         padding: 20,
-        textBorderWidth: 0,
+        textBorderWidth: 5,
         textBorderColor: "#000000",
       }))
     } else {
@@ -107,14 +107,14 @@ export default function SlideshowEditor({ formData, slideshowData, onBack }: Sli
         textPosition: { x: 25, y: 200 },
         textSize: { width: 350, height: 50 },
         fontSize: 24,
-        fontFamily: "Inter",
+        fontFamily: "TikTok Sans",
         textColor: "#ffffff",
         textAlign: "center",
         brightness: 100,
         contrast: 100,
         overlayOpacity: 0,
         padding: 20,
-        textBorderWidth: 0,
+        textBorderWidth: 5,
         textBorderColor: "#000000",
       }))
     }
@@ -446,9 +446,6 @@ export default function SlideshowEditor({ formData, slideshowData, onBack }: Sli
             : `Slide ${currentSlideIndex + 1} of ${slides.length}`}
         </div>
         <div className="flex items-center gap-2">
-          <Button variant="outline" size="sm">
-            Preview
-          </Button>
           <Button
             size="sm"
             onClick={handleExport}
@@ -576,6 +573,8 @@ export default function SlideshowEditor({ formData, slideshowData, onBack }: Sli
                       ? `${currentSlide.textBorderWidth}px ${currentSlide.textBorderColor}`
                       : 'none',
                     paintOrder: 'stroke fill',
+                    strokeLinejoin: 'round',
+                    strokeLinecap: 'round',
                   }}
                 >
                   {currentSlide.text}

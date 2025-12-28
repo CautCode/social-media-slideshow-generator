@@ -4,24 +4,30 @@ Based on the rubric's demand for "tangible outputs" 2 and the specific feedback 
 
 1. Core AI & Content Features (Novelty)
 
+**DONE WITH SEARCHING AS WELL**
 Structured AI Content Generation: Use OpenAI to generate slide headlines, body text, speaker notes, and specific search keywords for each slide based on user input.
 
+**DONE**
 Automated Stock Photo Sourcing: Fully functional integration with the Pexels (or Pixabay) API to automatically fetch and display images based on AI-generated keywords.
 
+**NEED TO MAKE SURE THAT THIS CREATES IT IN THE NECESSARY STYLE**
 Template & Tone Engine: Logic that adjusts the generated content's style (e.g., "Minimal" vs. "Bold") and tone (e.g., "Professional" vs. "Humorous").
 
 2. The Visual Editor (Tangible Output)
 
+**DONE**
 Interactive Canvas: A functional UI where users can see the slides and make live adjustments.
 
+**DONE**
 Text & Layout Controls: Ability to modify font size, color, alignment, and drag-and-drop text positioning555.
 
-
+**DONE**
 Image Modification: Sliders or inputs for adjusting brightness, contrast, and background overlay opacity6.
 
 **DONE**
 Slide Management: Drag-and-drop functionality to reorder slides and a thumbnail preview for navigation7.
 
+**DONE**
 3. Critical Technical Requirements (Passing Criteria)
 Functional Export/Download: A mechanism to save the final slideshow as a file (e.g., PNG or PDF) so it is no longer just "session-based".
 
