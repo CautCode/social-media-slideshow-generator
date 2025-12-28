@@ -48,24 +48,55 @@ export default function SlideshowForm({ initialData, currentStep, onStepChange }
   const templates = [
     {
       name: "Bold",
-      description: "Eye-catching designs with vibrant colors and dynamic layouts that grab attention instantly.",
+      description: "Short, punchy statements that build up to a product reveal or strong message. Great for storytelling.",
+      example: {
+        title: "POV: You're about to enjoy a good meal",
+        slides: [
+          "But you forgot to check the macros",
+          "Don't worry that's why I'm here",
+          "Cal AI tracks everything for you",
+          "Now that's a good meal :)"
+        ]
+      }
     },
     {
       name: "Informational",
-      description: "Clean, structured layouts focused on delivering clear information and data to your audience.",
+      description: "Detailed breakdowns of multiple items with features and benefits. Perfect for recommendations and reviews.",
+      example: {
+        title: "Journalling apps you'll actually use (all free)",
+        slides: [
+          "Cherish - Seven journal formats, cozy music, special prompts",
+          "Mood Chonk - Track moods, gratitude journal, super cute",
+          "Stoic - Clean UI, morning prep & evening reflection",
+          "Ghost Diary - Tag moods & activities, no ads"
+        ]
+      }
     },
     {
       name: "Top 10",
-      description:
-        "List-style format perfect for countdowns, rankings, and numbered content that keeps viewers engaged.",
+      description: "Numbered list format with brief descriptions for each item. Ideal for rankings, tips, and must-haves.",
+      example: {
+        title: "3 Supplements you need to be taking as a natty lifter",
+        slides: [
+          "1) Fish Oil - Rich in omega-3s, reduces inflammation",
+          "2) Magnesium Glucinate - Better sleep, less cramps",
+          "3) Vitamin D 10,000 IUs - Boosts testosterone & mood",
+          "4) Zinc - Supports recovery & immune health"
+        ]
+      }
     },
     {
       name: "Hard Sell",
-      description: "Persuasive designs with strong CTAs and benefit-focused messaging to drive conversions.",
-    },
-    {
-      name: "Minimal",
-      description: "Simple, elegant layouts with plenty of white space and subtle typography for a refined look.",
+      description: "Direct, benefit-focused messaging with minimal text per slide. Ends with a clear call-to-action.",
+      example: {
+        title: "Cleanest hoodie ever",
+        slides: [
+          "So fresh",
+          "Cotton only",
+          "Free shipping",
+          "Get it in the link in bio"
+        ]
+      }
     },
   ]
 
@@ -275,7 +306,7 @@ export default function SlideshowForm({ initialData, currentStep, onStepChange }
                 <div className="space-y-4">
                   <Label className="text-lg font-medium">Template style</Label>
                   <Tabs value={formData.template} onValueChange={(value) => updateField("template", value)}>
-                    <TabsList className="grid w-full grid-cols-5">
+                    <TabsList className="grid w-full grid-cols-4">
                       {templates.map((template) => (
                         <TabsTrigger key={template.name} value={template.name} className="text-sm">
                           {template.name}
@@ -286,6 +317,23 @@ export default function SlideshowForm({ initialData, currentStep, onStepChange }
                       <TabsContent key={template.name} value={template.name} className="mt-4">
                         <Card className="p-6 bg-accent/30">
                           <p className="text-sm leading-relaxed text-muted-foreground">{template.description}</p>
+
+                          {template.example && (
+                            <div className="mt-2 pt-2 border-t border-border/50">
+                              <p className="text-xs font-semibold text-muted-foreground mb-3 uppercase tracking-wide">Example Text</p>
+                              <div className="bg-background/60 rounded-lg p-4 space-y-3">
+                                <p className="font-semibold text-sm text-foreground">{template.example.title}</p>
+                                <div className="space-y-2">
+                                  {template.example.slides.map((slide, idx) => (
+                                    <div key={idx} className="text-xs text-muted-foreground flex items-start gap-2">
+                                      <span className="text-primary font-medium mt-0.5">→</span>
+                                      <span className="flex-1">{slide}</span>
+                                    </div>
+                                  ))}
+                                </div>
+                              </div>
+                            </div>
+                          )}
                         </Card>
                       </TabsContent>
                     ))}
