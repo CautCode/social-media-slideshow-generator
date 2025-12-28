@@ -128,7 +128,9 @@ export default function SlideshowEditor({ formData, slideshowData, onBack }: Sli
   const [dragStart, setDragStart] = useState({ x: 0, y: 0 })
   const [draggedSlideIndex, setDraggedSlideIndex] = useState<number | null>(null)
   const [imageSearchOpen, setImageSearchOpen] = useState(false)
-  const [searchQuery, setSearchQuery] = useState("")
+  const [searchQuery, setSearchQuery] = useState(slideshowData?.globalSuggestedImageTerm || "")
+  const [searchResults, setSearchResults] = useState<Array<{ url: string; photographer?: string; photographerUrl?: string; alt?: string }>>([])
+  const [isSearching, setIsSearching] = useState(false)
   const [isExporting, setIsExporting] = useState(false)
   const [isExportingAll, setIsExportingAll] = useState(false)
   const [exportProgress, setExportProgress] = useState({ current: 0, total: 0 })
@@ -173,6 +175,9 @@ export default function SlideshowEditor({ formData, slideshowData, onBack }: Sli
     slideshowData?.suggestedReplacementImages && slideshowData.suggestedReplacementImages.length > 0
       ? slideshowData.suggestedReplacementImages
       : mockImages.map((url) => ({ url, photographer: undefined, photographerUrl: undefined, alt: undefined }))
+
+  // Display search results if available, otherwise show suggested images
+  const displayedImages = searchResults.length > 0 ? searchResults : suggestedImages
 
   // Debug logging
   console.log("🖼️ Suggested Images Debug:", {
@@ -291,6 +296,29 @@ export default function SlideshowEditor({ formData, slideshowData, onBack }: Sli
         : undefined,
     })
     setImageSearchOpen(false)
+  }
+
+  const handleImageSearch = async () => {
+    if (!searchQuery.trim()) return
+
+    setIsSearching(true)
+    try {
+      const response = await fetch("/api/search-images", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ query: searchQuery, perPage: 3 }),
+      })
+
+      if (!response.ok) throw new Error("Search failed")
+
+      const data = await response.json()
+      setSearchResults(data.images || [])
+    } catch (error) {
+      console.error("Error searching images:", error)
+      setSearchResults([])
+    } finally {
+      setIsSearching(false)
+    }
   }
 
   const setTextPreset = (preset: "top" | "center" | "bottom") => {
@@ -723,7 +751,15 @@ export default function SlideshowEditor({ formData, slideshowData, onBack }: Sli
                   )}
                 </div>
 
-                <Dialog open={imageSearchOpen} onOpenChange={setImageSearchOpen}>
+                <Dialog
+                  open={imageSearchOpen}
+                  onOpenChange={(open) => {
+                    setImageSearchOpen(open)
+                    if (!open) {
+                      setSearchResults([])
+                    }
+                  }}
+                >
                   <DialogTrigger asChild>
                     <Button variant="outline" className="w-full bg-transparent">
                       <Search className="h-4 w-4 mr-2" />
@@ -735,17 +771,27 @@ export default function SlideshowEditor({ formData, slideshowData, onBack }: Sli
                       <DialogTitle>Search Images</DialogTitle>
                     </DialogHeader>
                     <div className="space-y-4">
-                      <div className="relative">
-                        <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                        <Input
-                          placeholder="Search Pexels, Unsplash..."
-                          value={searchQuery}
-                          onChange={(e) => setSearchQuery(e.target.value)}
-                          className="pl-9"
-                        />
+                      <div className="flex gap-2">
+                        <div className="relative flex-1">
+                          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                          <Input
+                            placeholder="Search Pexels..."
+                            value={searchQuery}
+                            onChange={(e) => setSearchQuery(e.target.value)}
+                            onKeyDown={(e) => {
+                              if (e.key === "Enter") {
+                                handleImageSearch()
+                              }
+                            }}
+                            className="pl-9"
+                          />
+                        </div>
+                        <Button onClick={handleImageSearch} disabled={isSearching || !searchQuery.trim()}>
+                          {isSearching ? "Searching..." : "Search"}
+                        </Button>
                       </div>
                       <div className="grid grid-cols-3 gap-2 max-h-[400px] overflow-y-auto">
-                        {suggestedImages.map((img, idx) => (
+                        {displayedImages.map((img, idx) => (
                           <button
                             key={idx}
                             onClick={() => {
