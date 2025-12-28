@@ -21,6 +21,7 @@ import {
   AlignRight,
   Upload,
   Search,
+  Grid3x3,
 } from "lucide-react"
 import type { FormData } from "./slideshow-generator"
 import type { SlideshowResponse } from "@/lib/types/slideshow"
@@ -132,6 +133,7 @@ export default function SlideshowEditor({ formData, slideshowData, onBack }: Sli
   const [isExportingAll, setIsExportingAll] = useState(false)
   const [exportProgress, setExportProgress] = useState({ current: 0, total: 0 })
   const [slideChangeTimestamp, setSlideChangeTimestamp] = useState(Date.now())
+  const [showGrid, setShowGrid] = useState(true)
   const canvasRef = useRef<HTMLDivElement>(null)
 
   // Regenerate slides when slideshowData or formData changes (new slideshow created)
@@ -441,8 +443,8 @@ export default function SlideshowEditor({ formData, slideshowData, onBack }: Sli
       <div className="flex-1 flex overflow-hidden">
         {/* Center: Canvas */}
         <div className="flex-1 flex flex-col items-center justify-center bg-muted/10 p-8 overflow-auto relative">
-          {/* Zoom Slider - Sticky */}
-          <div className="absolute top-3 left-3 z-10 flex items-center gap-2 bg-background/95 backdrop-blur-sm border border-border rounded-md px-3 py-1.5 shadow-md">
+          {/* Zoom Slider & Grid Toggle - Sticky */}
+          <div className="absolute top-3 left-3 z-10 flex items-center gap-3 bg-background/95 backdrop-blur-sm border border-border rounded-md px-3 py-1.5 shadow-md">
             <span className="text-xs font-medium whitespace-nowrap">Zoom: {zoom}%</span>
             <Slider
               value={[zoom]}
@@ -452,6 +454,16 @@ export default function SlideshowEditor({ formData, slideshowData, onBack }: Sli
               step={5}
               className="w-24"
             />
+            <div className="w-px h-4 bg-border" />
+            <Button
+              variant={showGrid ? "default" : "outline"}
+              size="sm"
+              onClick={() => setShowGrid(!showGrid)}
+              className="h-7 w-7 p-0"
+              title={showGrid ? "Hide grid" : "Show grid"}
+            >
+              <Grid3x3 className="h-3.5 w-3.5" />
+            </Button>
           </div>
 
           <div
@@ -488,15 +500,17 @@ export default function SlideshowEditor({ formData, slideshowData, onBack }: Sli
             />
 
             {/* Grid Overlay */}
-            <div
-              data-exclude-from-export
-              className="absolute inset-0 pointer-events-none"
-              style={{
-                backgroundImage:
-                  "linear-gradient(rgba(255,255,255,0.1) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.1) 1px, transparent 1px)",
-                backgroundSize: "50px 50px",
-              }}
-            />
+            {showGrid && (
+              <div
+                data-exclude-from-export
+                className="absolute inset-0 pointer-events-none"
+                style={{
+                  backgroundImage:
+                    "linear-gradient(rgba(255,255,255,0.1) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.1) 1px, transparent 1px)",
+                  backgroundSize: "50px 50px",
+                }}
+              />
+            )}
 
             {/* Draggable Text */}
             <div
