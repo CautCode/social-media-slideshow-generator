@@ -51,6 +51,9 @@ FINAL FEATURES:
 -- added examples
 -- simplified graph structure
 * STYLING UPGRADE WITH LANDING PAGE
+* add loading after creating the slideshow
+* fix the rounded corners issue
+* 
 
 
 slideshow examples:
