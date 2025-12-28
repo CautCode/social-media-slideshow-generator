@@ -55,10 +55,9 @@ export async function POST(request: NextRequest) {
       template: formData.template,
     })
 
-    // Invoke the graph
+    // Invoke the graph (now handles both content generation and image enrichment)
     const result = await graph.invoke({
       formData,
-      messages: [],
     })
 
     // Check for errors in the graph execution

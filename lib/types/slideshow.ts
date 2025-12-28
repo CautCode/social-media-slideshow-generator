@@ -14,9 +14,8 @@ export type ImageMetadata = z.infer<typeof ImageMetadataSchema>
 // This is what the LLM generates via structured output
 export const LLMSlideContentSchema = z.object({
   slideNumber: z.number().min(1).max(10),
-  headline: z.string().min(1).max(100),
-  bodyText: z.string().min(0).max(300),
-  speakerNotes: z.string(),
+  text: z.string().min(1).max(500),
+  suggestedImageKeyword: z.string(),
 })
 
 export type LLMSlideContent = z.infer<typeof LLMSlideContentSchema>
@@ -24,7 +23,6 @@ export type LLMSlideContent = z.infer<typeof LLMSlideContentSchema>
 // Zod schema for the LLM response (without images)
 export const LLMSlideshowResponseSchema = z.object({
   slides: z.array(LLMSlideContentSchema),
-  suggestedImageKeywords: z.array(z.string()),
   globalSuggestedImageTerm: z.string(),
 })
 
@@ -33,9 +31,8 @@ export type LLMSlideshowResponse = z.infer<typeof LLMSlideshowResponseSchema>
 // Zod schema for a complete slide (with image fields added later)
 export const SlideContentSchema = z.object({
   slideNumber: z.number().min(1).max(10),
-  headline: z.string().min(1).max(100),
-  bodyText: z.string().min(0).max(300),
-  speakerNotes: z.string(),
+  text: z.string().min(1).max(500),
+  suggestedImageKeyword: z.string(),
   imageUrl: z.string().url().optional(),
   imageMetadata: ImageMetadataSchema.optional(),
 })
@@ -45,7 +42,6 @@ export type SlideContent = z.infer<typeof SlideContentSchema>
 // Zod schema for the complete slideshow response (with images)
 export const SlideshowResponseSchema = z.object({
   slides: z.array(SlideContentSchema),
-  suggestedImageKeywords: z.array(z.string()),
   globalSuggestedImageTerm: z.string().optional(),
   suggestedReplacementImages: z.array(ImageMetadataSchema).optional(),
 })

@@ -13,7 +13,6 @@ This application helps users create professional social media slideshows (Instag
 ### 1. **AI-Powered Content Generation**
 - Automatically generates slideshow text content based on your inputs
 - Creates compelling headlines and body text for each slide
-- Includes speaker notes for presentation guidance
 - Uses OpenAI's GPT-4o-mini for cost-effective generation
 
 ### 2. **Customizable Inputs**
@@ -162,7 +161,6 @@ To use this application, you need:
 4. System generates 5-10 slides with:
    - AI-written headlines and body text
    - Relevant stock photos from Pexels
-   - Speaker notes for each slide
 5. User can customize text, positioning, and image adjustments
 6. User can reorder slides as needed
 7. **⚠️ Currently stops here** - no way to export or save the final result

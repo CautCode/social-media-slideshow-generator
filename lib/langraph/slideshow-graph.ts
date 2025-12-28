@@ -1,5 +1,5 @@
 import { StateGraph, END, START, Annotation } from "@langchain/langgraph"
-import { BaseMessage, HumanMessage } from "@langchain/core/messages"
+import { HumanMessage } from "@langchain/core/messages"
 import { ChatOpenAI } from "@langchain/openai"
 import {
   LLMSlideshowResponseSchema,
@@ -7,14 +7,11 @@ import {
   type SlideshowResponse,
   type LLMSlideshowResponse,
 } from "@/lib/types/slideshow"
-import { searchPexelsPhotos } from "@/lib/apis/pexels"
+import { fetchSlideImages, fetchAlternativeImages } from "@/lib/services/image-service"
 
 // Define the state annotation for our graph
 const GraphStateAnnotation = Annotation.Root({
   formData: Annotation<GenerateSlideshowRequest>,
-  messages: Annotation<BaseMessage[]>({
-    reducer: (x, y) => x.concat(y),
-  }),
   slideshowContent: Annotation<SlideshowResponse | undefined>,
   error: Annotation<string | undefined>,
 })
@@ -46,14 +43,13 @@ async function generateSlideshow(
     const llmResponse = (await structuredLLM.invoke([new HumanMessage(prompt)])) as LLMSlideshowResponse
 
     // Convert LLM response to full SlideshowResponse format
-    // Image fields will be added later by the fetchImagesForSlides node
+    // Image fields will be added later by the enrichWithImages node
     const slideshowContent: SlideshowResponse = {
       slides: llmResponse.slides.map((slide) => ({
         ...slide,
         imageUrl: undefined,
         imageMetadata: undefined,
       })),
-      suggestedImageKeywords: llmResponse.suggestedImageKeywords,
       globalSuggestedImageTerm: llmResponse.globalSuggestedImageTerm,
     }
 
@@ -91,162 +87,208 @@ ${templateGuidance}
 ${formData.imageOption === "stock" && formData.imageVibe ? `**Image Vibe**: ${formData.imageVibe}` : ""}
 
 Create exactly ${formData.slideCount} slides. Each slide should:
-- Have a concise, attention-grabbing headline (max 100 chars)
-- Include supporting body text that elaborates (max 300 chars)
-- Include speaker notes with tips for presenting this slide
+- Contain compelling text content (max 500 chars per slide)
+- You can use newlines to separate a headline from body text if needed for the template style
 - Follow the ${formData.template} template style
 - Be optimized for ${formData.tone.toLowerCase()} tone
 - Progress logically (hook → value → CTA)
+- Include a suggestedImageKeyword field for each slide with a specific image search term${formData.imageOption === "stock" && formData.imageVibe ? ` that matches the vibe: "${formData.imageVibe}"` : ""}
 
 Slide 1 should hook the audience. Middle slides should deliver value. Final slide should include the call-to-action: "${formData.cta}"
 
-${formData.imageOption === "stock" && formData.imageVibe ? `Also suggest ${formData.slideCount} image search keywords (one per slide) that match the vibe: "${formData.imageVibe}"` : `Also suggest ${formData.slideCount} generic image search keywords for the slideshow (one per slide).`}
+IMPORTANT: The text field should contain the complete slide content. You may use newlines (\\n) to create visual separation between a headline and supporting text when appropriate for the template style.
 
-ADDITIONALLY, provide ONE single global search term that captures the main theme of this entire slideshow. This should be a concise phrase (1-3 words) that represents the core visual concept for finding alternative images.
+REQUIRED: Each slide object MUST include a "suggestedImageKeyword" field with a specific search term for finding relevant stock photos for that particular slide.
+
+ADDITIONALLY, provide ONE single global search term (globalSuggestedImageTerm) that captures the main theme of this entire slideshow. This should be a concise phrase (1-3 words) that represents the core visual concept for finding alternative images.
 
 Generate the slideshow content now.`
 }
 
 // Helper function for template-specific guidance
 function getTemplateGuidance(template: string): string {
-  const guidance: Record<string, string> = {
-    Bold: "Use powerful, action-oriented language. Headlines should be provocative and demand attention. Think big, bold statements.",
-    Informational:
-      "Focus on clear, educational content. Use data points, facts, and structured information. Professional and straightforward.",
-    "Top 10":
-      "Structure as a countdown or numbered list. Each slide should present one item with its number (e.g., '#5: ...'). Build anticipation.",
-    "Hard Sell":
-      "Emphasize benefits and urgency. Use persuasive language focused on transformation and results. Strong CTAs throughout.",
-    Minimal: "Keep it simple and elegant. Short, impactful headlines with minimal body text. Less is more.",
+  const llmGuidance: Record<string, string> = {
+    Bold: `Short, punchy statements that build up to a product reveal or strong message. Great for storytelling. Use powerful language that demands attention.
+
+Example JSON response:
+{
+  "slides": [
+    {
+      "slideNumber": 1,
+      "text": "POV: You're about to enjoy a good meal",
+      "suggestedImageKeyword": "healthy meal prep"
+    },
+    {
+      "slideNumber": 2,
+      "text": "But you forgot to check the macros",
+      "suggestedImageKeyword": "confused person food"
+    },
+    {
+      "slideNumber": 3,
+      "text": "Don't worry that's why I'm here",
+      "suggestedImageKeyword": "helpful assistant"
+    },
+    {
+      "slideNumber": 4,
+      "text": "Cal AI tracks everything for you",
+      "suggestedImageKeyword": "nutrition tracking app"
+    },
+    {
+      "slideNumber": 5,
+      "text": "Now that's a good meal :)",
+      "suggestedImageKeyword": "satisfied eating"
+    }
+  ],
+  "globalSuggestedImageTerm": "healthy eating"
+}`,
+
+    Informational: `Detailed breakdowns of multiple items with features and benefits. Perfect for recommendations and reviews. Focus on clear, educational content with data points and facts.
+
+Example JSON response:
+{
+  "slides": [
+    {
+      "slideNumber": 1,
+      "text": "Journalling apps you'll actually use (all free)",
+      "suggestedImageKeyword": "journaling apps smartphone"
+    },
+    {
+      "slideNumber": 2,
+      "text": "Cherish\\nSeven journal formats, cozy music, special prompts",
+      "suggestedImageKeyword": "cozy journaling"
+    },
+    {
+      "slideNumber": 3,
+      "text": "Mood Chonk\\nTrack moods, gratitude journal, super cute",
+      "suggestedImageKeyword": "mood tracking journal"
+    },
+    {
+      "slideNumber": 4,
+      "text": "Stoic\\nClean UI, morning prep & evening reflection",
+      "suggestedImageKeyword": "minimalist journaling"
+    },
+    {
+      "slideNumber": 5,
+      "text": "Ghost Diary\\nTag moods & activities, no ads",
+      "suggestedImageKeyword": "digital diary"
+    }
+  ],
+  "globalSuggestedImageTerm": "journaling"
+}`,
+
+    "Top 10": `Numbered list format with brief descriptions for each item. Ideal for rankings, tips, and must-haves. Each slide should present one item with its number (e.g., '#1: ...', '#2: ...').
+
+Example JSON response:
+{
+  "slides": [
+    {
+      "slideNumber": 1,
+      "text": "3 Supplements you need to be taking as a natty lifter",
+      "suggestedImageKeyword": "supplements fitness"
+    },
+    {
+      "slideNumber": 2,
+      "text": "1) Fish Oil\\nRich in omega-3s, reduces inflammation",
+      "suggestedImageKeyword": "fish oil capsules"
+    },
+    {
+      "slideNumber": 3,
+      "text": "2) Magnesium Glucinate\\nBetter sleep, less cramps",
+      "suggestedImageKeyword": "magnesium supplement"
+    },
+    {
+      "slideNumber": 4,
+      "text": "3) Vitamin D 10,000 IUs\\nBoosts testosterone & mood",
+      "suggestedImageKeyword": "vitamin d sunshine"
+    },
+    {
+      "slideNumber": 5,
+      "text": "4) Zinc\\nSupports recovery & immune health",
+      "suggestedImageKeyword": "zinc supplement"
+    }
+  ],
+  "globalSuggestedImageTerm": "fitness supplements"
+}`,
+
+    "Hard Sell": `Direct, benefit-focused messaging with minimal text per slide. Ends with a clear call-to-action. Emphasize benefits and urgency using persuasive language.
+
+Example JSON response:
+{
+  "slides": [
+    {
+      "slideNumber": 1,
+      "text": "Cleanest hoodie ever",
+      "suggestedImageKeyword": "premium hoodie"
+    },
+    {
+      "slideNumber": 2,
+      "text": "So fresh",
+      "suggestedImageKeyword": "fresh clean clothing"
+    },
+    {
+      "slideNumber": 3,
+      "text": "Cotton only",
+      "suggestedImageKeyword": "cotton fabric"
+    },
+    {
+      "slideNumber": 4,
+      "text": "Free shipping",
+      "suggestedImageKeyword": "fast delivery"
+    },
+    {
+      "slideNumber": 5,
+      "text": "Get it in the link in bio",
+      "suggestedImageKeyword": "shop now"
+    }
+  ],
+  "globalSuggestedImageTerm": "premium clothing"
+}`,
   }
 
-  return guidance[template] || ""
+  return llmGuidance[template] || ""
 }
 
-// Node function: Fetch images for slides from Pexels
-async function fetchImagesForSlides(
+// Node function: Enrich slideshow with images from Pexels
+async function enrichWithImages(
   state: typeof GraphStateAnnotation.State
 ): Promise<Partial<typeof GraphStateAnnotation.State>> {
   const { slideshowContent, formData } = state
 
-  // Only fetch images if stock photos option is selected
-  if (!slideshowContent || formData.imageOption !== "stock") {
+  if (!slideshowContent) {
     return {}
   }
 
   try {
-    // Fetch images for each slide using suggested keywords or headlines
-    const imageResults = await Promise.all(
-      slideshowContent.slides.map(async (slide, index) => {
-        try {
-          // Use suggested keywords if available, otherwise fall back to headline
-          const query =
-            slideshowContent.suggestedImageKeywords[index] ||
-            slide.headline ||
-            formData.promotion
-
-          // Add image vibe to query if provided
-          const searchQuery = formData.imageVibe
-            ? `${query} ${formData.imageVibe}`
-            : query
-
-          const photos = await searchPexelsPhotos(searchQuery, 1)
-
-          if (photos.length > 0) {
-            return {
-              imageUrl: photos[0].url,
-              imageMetadata: {
-                url: photos[0].url,
-                photographer: photos[0].photographer,
-                photographerUrl: photos[0].photographerUrl,
-                alt: photos[0].alt,
-              },
-            }
-          }
-
-          return { imageUrl: undefined, imageMetadata: undefined }
-        } catch (error) {
-          console.error(`Error fetching image for slide ${index + 1}:`, error)
-          return { imageUrl: undefined, imageMetadata: undefined }
-        }
-      })
+    // Fetch slide-specific images using service layer
+    const imageResults = await fetchSlideImages(
+      slideshowContent.slides,
+      formData
     )
 
-    // Update slides with image URLs and metadata
-    const updatedSlides = slideshowContent.slides.map((slide, index) => ({
+    // Merge slides with images
+    const slidesWithImages = slideshowContent.slides.map((slide, index) => ({
       ...slide,
       ...imageResults[index],
     }))
 
-    return {
-      slideshowContent: {
-        ...slideshowContent,
-        slides: updatedSlides,
-      },
-      error: undefined,
-    }
-  } catch (error) {
-    console.error("Error in fetchImagesForSlides node:", error)
-    return {
-      error: error instanceof Error ? error.message : "Failed to fetch images",
-    }
-  }
-}
-
-// Node function: Fetch suggested replacement images using global term
-async function fetchSuggestedReplacementImages(
-  state: typeof GraphStateAnnotation.State
-): Promise<Partial<typeof GraphStateAnnotation.State>> {
-  const { slideshowContent, formData } = state
-
-  console.log("🔍 fetchSuggestedReplacementImages called:", {
-    hasSlideshowContent: !!slideshowContent,
-    imageOption: formData.imageOption,
-    globalTerm: slideshowContent?.globalSuggestedImageTerm,
-  })
-
-  // Only fetch if stock photos option is selected and we have a global term
-  if (
-    !slideshowContent ||
-    formData.imageOption !== "stock" ||
-    !slideshowContent.globalSuggestedImageTerm
-  ) {
-    console.log("⏭️ Skipping suggested images fetch (conditions not met)")
-    return {}
-  }
-
-  try {
-    // Fetch 3 images using the global suggested term
-    const searchQuery = formData.imageVibe
-      ? `${slideshowContent.globalSuggestedImageTerm} ${formData.imageVibe}`
-      : slideshowContent.globalSuggestedImageTerm
-
-    console.log("🔎 Fetching suggested images with query:", searchQuery)
-    const photos = await searchPexelsPhotos(searchQuery, 3)
-
-    // Convert to ImageMetadata format
-    const suggestedReplacementImages = photos.map((photo) => ({
-      url: photo.url,
-      photographer: photo.photographer,
-      photographerUrl: photo.photographerUrl,
-      alt: photo.alt,
-    }))
-
-    console.log("✅ Fetched", suggestedReplacementImages.length, "suggested images")
+    // Fetch alternative images using service layer
+    const alternativeImages = await fetchAlternativeImages(
+      slideshowContent.globalSuggestedImageTerm,
+      formData.imageVibe
+    )
 
     return {
       slideshowContent: {
         ...slideshowContent,
-        suggestedReplacementImages,
+        slides: slidesWithImages,
+        suggestedReplacementImages: alternativeImages,
       },
       error: undefined,
     }
   } catch (error) {
-    console.error("Error fetching suggested replacement images:", error)
-    // Don't fail the whole workflow - just log and continue
-    return {
-      error: undefined, // Don't propagate error, suggested images are optional
-    }
+    console.error("Error enriching with images:", error)
+    // Don't fail - return slides without images
+    return { error: undefined }
   }
 }
 
@@ -254,20 +296,16 @@ async function fetchSuggestedReplacementImages(
 export function createSlideshowGraph() {
   const workflow = new StateGraph(GraphStateAnnotation)
 
-  // Add nodes
+  // Add nodes: content generation + image enrichment
   workflow.addNode("generate", generateSlideshow)
-  workflow.addNode("fetchImages", fetchImagesForSlides)
-  workflow.addNode("fetchSuggestedImages", fetchSuggestedReplacementImages)
+  workflow.addNode("enrichWithImages", enrichWithImages)
 
   // Set entry point
   workflow.addEdge(START, "generate")
 
-  // Generate content first, then fetch images, then fetch suggested images
-  workflow.addEdge("generate", "fetchImages")
-  workflow.addEdge("fetchImages", "fetchSuggestedImages")
-
-  // Suggested images to end
-  workflow.addEdge("fetchSuggestedImages", END)
+  // Linear flow: generate content → enrich with images → end
+  workflow.addEdge("generate", "enrichWithImages")
+  workflow.addEdge("enrichWithImages", END)
 
   return workflow.compile()
 }

@@ -5,7 +5,7 @@ Based on the rubric's demand for "tangible outputs" 2 and the specific feedback 
 1. Core AI & Content Features (Novelty)
 
 **DONE WITH SEARCHING AS WELL**
-Structured AI Content Generation: Use OpenAI to generate slide headlines, body text, speaker notes, and specific search keywords for each slide based on user input.
+Structured AI Content Generation: Use OpenAI to generate slide headlines, body text, and specific search keywords for each slide based on user input.
 
 **DONE**
 Automated Stock Photo Sourcing: Fully functional integration with the Pexels (or Pixabay) API to automatically fetch and display images based on AI-generated keywords.
@@ -48,6 +48,8 @@ Would you like me to help you draft the specific "User Stories" for these featur
 
 FINAL FEATURES:
 * PROPER LANGGRAPH FLOW FOR BETTER SLIDESHOWS
+-- added examples
+-- simplified graph structure
 * STYLING UPGRADE WITH LANDING PAGE
 
 
@@ -153,3 +155,11 @@ Get it in the link in bio
 
 
 ---
+
+
+Prompt testing
+
+Slim AI revolutionizes your fitness journey by using advanced artificial intelligence to make precise calorie tracking completely effortless. This intuitive companion provides the personalized insights and daily motivation you need to reach your health goals with total confidence.
+
+Slim AI is designed specifically for women looking to confidently restart their fitness journey.
+

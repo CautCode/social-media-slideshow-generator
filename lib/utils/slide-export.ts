@@ -2,7 +2,7 @@ import { toBlob } from 'html-to-image'
 
 interface SlideMetadata {
   slideNumber: number
-  headline: string
+  text: string
   imageUrl?: string
 }
 
@@ -17,10 +17,11 @@ interface ExportProgress {
  * Example: slide-1-introducing-our-product.png
  */
 function generateFilename(metadata: SlideMetadata): string {
-  const { slideNumber, headline } = metadata
+  const { slideNumber, text } = metadata
 
-  // Create slug from headline
-  const slug = headline
+  // Create slug from text (use first line if multiline)
+  const firstLine = text.split('\n')[0]
+  const slug = firstLine
     .toLowerCase()
     .replace(/[^a-z0-9]+/g, '-') // Replace non-alphanumeric with hyphens
     .replace(/^-+|-+$/g, '') // Trim leading/trailing hyphens

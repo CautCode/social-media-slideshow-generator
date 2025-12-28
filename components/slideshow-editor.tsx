@@ -31,9 +31,6 @@ type Slide = {
   id: string
   imageUrl: string
   text: string
-  headline: string
-  bodyText: string
-  speakerNotes: string
   imageMetadata?: {
     photographer?: string
     photographerUrl?: string
@@ -76,10 +73,7 @@ export default function SlideshowEditor({ formData, slideshowData, onBack }: Sli
       return slideshowData.slides.map((slide, i) => ({
         id: `slide-${slide.slideNumber}`,
         imageUrl: slide.imageUrl || defaultImages[i % defaultImages.length],
-        text: slide.headline,
-        headline: slide.headline,
-        bodyText: slide.bodyText,
-        speakerNotes: slide.speakerNotes,
+        text: slide.text,
         imageMetadata: slide.imageMetadata,
         textPosition: { x: 25, y: 200 },
         textSize: { width: 350, height: 50 },
@@ -101,9 +95,6 @@ export default function SlideshowEditor({ formData, slideshowData, onBack }: Sli
         id: `slide-${i + 1}`,
         imageUrl: defaultImages[i % defaultImages.length],
         text: i === 0 ? formData.promotion : `Slide ${i + 1} content for ${formData.audience}`,
-        headline: i === 0 ? formData.promotion : `Slide ${i + 1} content`,
-        bodyText: `Supporting text for ${formData.audience}`,
-        speakerNotes: "",
         textPosition: { x: 25, y: 200 },
         textSize: { width: 350, height: 50 },
         fontSize: 24,
@@ -348,7 +339,7 @@ export default function SlideshowEditor({ formData, slideshowData, onBack }: Sli
       console.log('[handleExport] Calling exportSlideAsPNG...')
       await exportSlideAsPNG(canvasRef.current, {
         slideNumber: currentSlideIndex + 1,
-        headline: currentSlide.headline,
+        text: currentSlide.text,
         imageUrl: currentSlide.imageUrl,
       })
       console.log('[handleExport] Export completed successfully')
@@ -386,7 +377,7 @@ export default function SlideshowEditor({ formData, slideshowData, onBack }: Sli
         },
         slides.map((slide, index) => ({
           slideNumber: index + 1,
-          headline: slide.headline,
+          text: slide.text,
           imageUrl: slide.imageUrl,
         })),
         (progress) => {
