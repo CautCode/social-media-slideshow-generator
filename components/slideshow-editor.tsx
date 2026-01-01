@@ -56,6 +56,36 @@ type SlideshowEditorProps = {
   onBack: () => void
 }
 
+/**
+ * Generate a text stroke effect using multiple text shadows in concentric rings.
+ * This avoids the jagged edges and artifacts of -webkit-text-stroke which traces
+ * font glyph paths and creates sharp corners on letters like D, F, L.
+ *
+ * Uses concentric rings with 16 directions each for smooth coverage at any width.
+ * - Thin strokes (1-3px): 1 ring, 16 shadows
+ * - Medium strokes (4-6px): 2-3 rings, 32-48 shadows
+ * - Thick strokes (7-10px): 4-5 rings, 64-80 shadows
+ */
+function generateTextStroke(width: number, color: string): string {
+  if (width <= 0) return 'none'
+
+  const shadows: string[] = []
+  const ringSpacing = 2 // pixels between each ring
+
+  // Create concentric rings from outer edge inward
+  for (let radius = width; radius > 0; radius -= ringSpacing) {
+    // 16 directions at 22.5° intervals for each ring
+    for (let angle = 0; angle < 360; angle += 22.5) {
+      const radians = (angle * Math.PI) / 180
+      const x = Math.round(Math.cos(radians) * radius * 100) / 100
+      const y = Math.round(Math.sin(radians) * radius * 100) / 100
+      shadows.push(`${x}px ${y}px 0 ${color}`)
+    }
+  }
+
+  return shadows.join(', ')
+}
+
 export default function SlideshowEditor({ formData, slideshowData, onBack }: SlideshowEditorProps) {
   const defaultImages = [
     "/business-presentation.png",
@@ -85,7 +115,7 @@ export default function SlideshowEditor({ formData, slideshowData, onBack }: Sli
         contrast: 100,
         overlayOpacity: 0,
         padding: 20,
-        textBorderWidth: 5,
+        textBorderWidth: 2,
         textBorderColor: "#000000",
       }))
     } else {
@@ -105,7 +135,7 @@ export default function SlideshowEditor({ formData, slideshowData, onBack }: Sli
         contrast: 100,
         overlayOpacity: 0,
         padding: 20,
-        textBorderWidth: 5,
+        textBorderWidth: 2,
         textBorderColor: "#000000",
       }))
     }
@@ -562,12 +592,10 @@ export default function SlideshowEditor({ formData, slideshowData, onBack }: Sli
                     color: currentSlide.textColor,
                     textAlign: currentSlide.textAlign,
                     lineHeight: 1.2,
-                    WebkitTextStroke: currentSlide.textBorderWidth > 0
-                      ? `${currentSlide.textBorderWidth}px ${currentSlide.textBorderColor}`
-                      : 'none',
-                    paintOrder: 'stroke fill',
-                    strokeLinejoin: 'round',
-                    strokeLinecap: 'round',
+                    textShadow: generateTextStroke(
+                      currentSlide.textBorderWidth,
+                      currentSlide.textBorderColor
+                    ),
                   }}
                 >
                   {currentSlide.text}
@@ -675,19 +703,14 @@ export default function SlideshowEditor({ formData, slideshowData, onBack }: Sli
                 </div>
 
                 <div className="space-y-2">
-                  <Label>Text Border Width</Label>
-                  <div className="flex items-center gap-2">
-                    <Input
-                      type="number"
-                      value={currentSlide.textBorderWidth}
-                      onChange={(e) => updateSlide({ textBorderWidth: Number(e.target.value) })}
-                      min={0}
-                      max={10}
-                      step={1}
-                      className="w-24"
-                    />
-                    <span className="text-sm text-muted-foreground">px</span>
-                  </div>
+                  <Label>Text Border Width: {currentSlide.textBorderWidth}px</Label>
+                  <Slider
+                    value={[currentSlide.textBorderWidth]}
+                    onValueChange={([value]) => updateSlide({ textBorderWidth: value })}
+                    min={0}
+                    max={3}
+                    step={0.25}
+                  />
                 </div>
 
                 <div className="space-y-2">
@@ -847,6 +870,7 @@ export default function SlideshowEditor({ formData, slideshowData, onBack }: Sli
               </TabsContent>
 
               <TabsContent value="layout" className="mt-0 space-y-4">
+
                 <div className="space-y-2">
                   <Label>Text Position Presets</Label>
                   <div className="grid grid-cols-3 gap-2">

@@ -67,15 +67,20 @@ export default function SlideshowSummary({ data, onBack, onEdit, onGenerate }: P
           </h1>
         </div>
 
-        {/* Progress Indicator */}
+        {/* Breadcrumb Progress Indicator */}
         <div className="mb-8">
-          <div className="flex items-center justify-center gap-2 text-sm text-muted-foreground">
-            <span className="font-medium text-foreground">Step 3</span>
-            <span>of</span>
-            <span>3</span>
-          </div>
-          <div className="mt-3 h-1.5 bg-secondary rounded-full overflow-hidden">
-            <div className="h-full w-full bg-primary rounded-full transition-all duration-300" />
+          <div className="flex items-center justify-center gap-2 text-sm">
+            <span className="text-muted-foreground">
+              Product Info
+            </span>
+            <span className="text-muted-foreground">›</span>
+            <span className="text-muted-foreground">
+              Settings
+            </span>
+            <span className="text-muted-foreground">›</span>
+            <span className="font-medium text-primary">
+              Review
+            </span>
           </div>
         </div>
 

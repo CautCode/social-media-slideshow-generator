@@ -9,7 +9,8 @@ import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Card } from "@/components/ui/card"
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs"
-import { ArrowRight, ArrowLeft, FileText, Upload, ImageIcon } from "lucide-react"
+import { ArrowRight, ArrowLeft, FileText, Upload, ImageIcon, Home } from "lucide-react"
+import Link from "next/link"
 import type { FormData } from "./slideshow-generator"
 
 type Props = {
@@ -110,18 +111,20 @@ export default function SlideshowForm({ initialData, currentStep, onStepChange }
           </h1>
         </div>
 
-        {/* Progress Indicator */}
+        {/* Breadcrumb Progress Indicator */}
         <div className="mb-8">
-          <div className="flex items-center justify-center gap-2 text-sm text-muted-foreground">
-            <span className="font-medium text-foreground">Step {currentStep}</span>
-            <span>of</span>
-            <span>3</span>
-          </div>
-          <div className="mt-3 h-1.5 bg-secondary rounded-full overflow-hidden">
-            <div
-              className="h-full bg-primary rounded-full transition-all duration-300"
-              style={{ width: `${(currentStep / 3) * 100}%` }}
-            />
+          <div className="flex items-center justify-center gap-2 text-sm">
+            <span className={currentStep === 1 ? "font-medium text-primary" : currentStep > 1 ? "text-muted-foreground" : "text-muted-foreground"}>
+              Product Info
+            </span>
+            <span className="text-muted-foreground">›</span>
+            <span className={currentStep === 2 ? "font-medium text-primary" : currentStep > 2 ? "text-muted-foreground" : "text-muted-foreground/50"}>
+              Settings
+            </span>
+            <span className="text-muted-foreground">›</span>
+            <span className="text-muted-foreground/50">
+              Review
+            </span>
           </div>
         </div>
 
@@ -345,7 +348,19 @@ export default function SlideshowForm({ initialData, currentStep, onStepChange }
             )}
 
             <div className="flex gap-3">
-              {currentStep > 1 && (
+              {currentStep === 1 ? (
+                <Link href="/" className="flex-1">
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="lg"
+                    className="w-full text-base font-medium h-12 bg-transparent"
+                  >
+                    <Home className="mr-2 h-5 w-5" />
+                    Back to Home
+                  </Button>
+                </Link>
+              ) : (
                 <Button
                   type="button"
                   variant="outline"

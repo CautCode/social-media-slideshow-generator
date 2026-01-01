@@ -64,7 +64,7 @@ export type GenerateSlideshowRequest = {
 export type GenerateSlideshowResponse =
   | {
       success: true
-      data: SlideshowResponse
+      data: SlideshowResponse 
     }
   | {
       success: false
