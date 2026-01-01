@@ -86,6 +86,35 @@ function generateTextStroke(width: number, color: string): string {
   return shadows.join(', ')
 }
 
+/**
+ * Split text into segments of regular text and emojis.
+ * Emojis will be rendered without text stroke.
+ */
+function parseTextWithEmojis(text: string): Array<{ text: string; isEmoji: boolean }> {
+  // Regex to match emojis (including compound emojis with ZWJ and variation selectors)
+  const emojiRegex = /(\p{Emoji_Presentation}|\p{Emoji}\uFE0F)/gu
+  const segments: Array<{ text: string; isEmoji: boolean }> = []
+  let lastIndex = 0
+
+  const matches = text.matchAll(emojiRegex)
+  for (const match of matches) {
+    // Add text before emoji
+    if (match.index! > lastIndex) {
+      segments.push({ text: text.slice(lastIndex, match.index), isEmoji: false })
+    }
+    // Add emoji
+    segments.push({ text: match[0], isEmoji: true })
+    lastIndex = match.index! + match[0].length
+  }
+
+  // Add remaining text
+  if (lastIndex < text.length) {
+    segments.push({ text: text.slice(lastIndex), isEmoji: false })
+  }
+
+  return segments.length > 0 ? segments : [{ text, isEmoji: false }]
+}
+
 export default function SlideshowEditor({ formData, slideshowData, onBack }: SlideshowEditorProps) {
   const defaultImages = [
     "/business-presentation.png",
@@ -592,13 +621,23 @@ export default function SlideshowEditor({ formData, slideshowData, onBack }: Sli
                     color: currentSlide.textColor,
                     textAlign: currentSlide.textAlign,
                     lineHeight: 1.2,
-                    textShadow: generateTextStroke(
-                      currentSlide.textBorderWidth,
-                      currentSlide.textBorderColor
-                    ),
                   }}
                 >
-                  {currentSlide.text}
+                  {parseTextWithEmojis(currentSlide.text).map((segment, idx) => (
+                    <span
+                      key={idx}
+                      style={{
+                        textShadow: segment.isEmoji
+                          ? 'none'
+                          : generateTextStroke(
+                              currentSlide.textBorderWidth,
+                              currentSlide.textBorderColor
+                            ),
+                      }}
+                    >
+                      {segment.text}
+                    </span>
+                  ))}
                 </p>
               </div>
 
