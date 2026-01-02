@@ -621,6 +621,7 @@ export default function SlideshowEditor({ formData, slideshowData, onBack }: Sli
                     color: currentSlide.textColor,
                     textAlign: currentSlide.textAlign,
                     lineHeight: 1.2,
+                    whiteSpace: 'pre-line',
                   }}
                 >
                   {parseTextWithEmojis(currentSlide.text).map((segment, idx) => (
