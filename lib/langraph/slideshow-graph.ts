@@ -69,46 +69,90 @@ async function generateSlideshow(
 function buildPrompt(formData: GenerateSlideshowRequest): string {
   const templateGuidance = getTemplateGuidance(formData.template)
 
-  return `You are an expert social media copywriter. Generate compelling slideshow content for Instagram/TikTok.
+  return `You are an expert viral content writer for TikTok and Instagram slideshows. Your job is to create carousel content that stops scrollers, builds engagement through each swipe, and drives action.
 
-**Product/Promotion**: ${formData.promotion}
+=== INPUTS ===
+Product/Promotion: ${formData.promotion}
+Target Audience: ${formData.audience}
+Tone: ${formData.tone}
+Call-to-Action: ${formData.cta}
+Number of Slides: ${formData.slideCount}
+Template Style: ${formData.template}
+${formData.imageOption === "stock" && formData.imageVibe ? `Image Vibe: ${formData.imageVibe}` : ""}
 
-**Target Audience**: ${formData.audience}
+=== TEMPLATE STYLES ===
 
-**Tone**: ${formData.tone}
-
-**Template Style**: ${formData.template}
 ${templateGuidance}
 
-**Call-to-Action**: ${formData.cta}
+=== WRITING RULES ===
 
-**Number of Slides**: ${formData.slideCount}
+1. **SLIDE 1 MUST HOOK**
+   - Use: questions, "POV:", bold claims, relatable scenarios, or "X things you..."
+   - Never start with generic introductions
+   - Create immediate curiosity or recognition
 
-${formData.imageOption === "stock" && formData.imageVibe ? `**Image Vibe**: ${formData.imageVibe}` : ""}
+2. **KEEP IT SHORT**
+   - Max 500 characters per slide
+   - Prefer fragments over full sentences
+   - One idea per slide
+   - Use line breaks to create rhythm
+   - NEVER use dashes (-) or bullet points in slide text - they don't fit the social media style
 
-Create exactly ${formData.slideCount} slides. Each slide should:
-- Contain compelling text content (max 500 chars per slide)
-- You can use newlines to separate a headline from body text if needed for the template style
-- Follow the ${formData.template} template style
-- Be optimized for ${formData.tone.toLowerCase()} tone
-- Progress logically (hook → value → CTA)
-- Include a suggestedImageKeyword field for each slide with a specific image search term${formData.imageOption === "stock" && formData.imageVibe ? ` that matches the vibe: "${formData.imageVibe}"` : ""}
+3. **SOUND HUMAN**
+   - Write like you're texting a friend who asked for advice
+   - Use lowercase for casual feel when tone allows
+   - Include opinions: "this is a game changer", "trust me on this"
+   - Acknowledge pain points: "we've all been there"
 
-Slide 1 should hook the audience. Middle slides should deliver value. Final slide should include the call-to-action: "${formData.cta}"
+4. **BUILD MOMENTUM**
+   - Each slide should make them want to swipe
+   - End slides with incomplete thoughts or teasers when appropriate
+   - Save the best insight or the product reveal for later slides
+   - Use "..." to create anticipation
 
-IMPORTANT: The text field should contain the complete slide content. You may use newlines (\\n) to create visual separation between a headline and supporting text when appropriate for the template style.
+5. **SPEAK DIRECTLY**
+   - Heavy use of "you" and "your"
+   - Address the audience's identity: "if you're a [type]..."
+   - Make them feel seen: reference specific struggles or desires
 
-REQUIRED: Each slide object MUST include a "suggestedImageKeyword" field with a specific search term for finding relevant stock photos for that particular slide.
+6. **END WITH PURPOSE**
+   - Final slide includes the CTA: "${formData.cta}"
+   - Make the action feel natural, not salesy
+   - Can add personality: emoji, encouragement, or a closing thought
 
-ADDITIONALLY, provide ONE single global search term (globalSuggestedImageTerm) that captures the main theme of this entire slideshow. This should be a concise phrase (1-3 words) that represents the core visual concept for finding alternative images.
+=== SLIDE STRUCTURE ===
 
-Generate the slideshow content now.`
+Generate exactly ${formData.slideCount} slides following this arc:
+- Slide 1: HOOK - Stop the scroll
+- Slides 2 to (n-1): VALUE - Deliver on the hook's promise
+- Final Slide: CTA - Drive the action with "${formData.cta}"
+
+=== OUTPUT FORMAT ===
+
+For each slide, provide:
+1. slideNumber: The slide position (1 to ${formData.slideCount})
+2. text: The complete slide content (max 500 chars, use \\n for line breaks)
+3. suggestedImageKeyword: A specific search term for stock photos${formData.imageOption === "stock" && formData.imageVibe ? ` matching "${formData.imageVibe}" vibe` : ""}
+
+Also provide:
+- globalSuggestedImageTerm: A 1-3 word theme for the entire slideshow
+
+=== EXAMPLES BY TEMPLATE ===
+
+These examples are already included in the template guidance above.
+
+Now generate slideshow content for the inputs provided above.`
 }
 
 // Helper function for template-specific guidance
 function getTemplateGuidance(template: string): string {
   const llmGuidance: Record<string, string> = {
-    Bold: `Short, punchy statements that build up to a product reveal or strong message. Great for storytelling. Use powerful language that demands attention.
+    Bold: `**BOLD** (Story-driven reveal)
+- Build a mini-narrative across slides
+- Use "POV:", scenario setups, or conversation formats
+- Short punchy lines that create suspense
+- Product/solution appears as the payoff
+- Example flow: Setup → Problem → Tension → Solution → Satisfaction
 
 Example JSON response:
 {
@@ -142,7 +186,12 @@ Example JSON response:
   "globalSuggestedImageTerm": "healthy eating"
 }`,
 
-    Informational: `Detailed breakdowns of multiple items with features and benefits. Perfect for recommendations and reviews. Focus on clear, educational content with data points and facts.
+    Informational: `**INFORMATIONAL** (Value-packed lists)
+- First slide: Hook with number + promise ("5 apps you'll actually use")
+- Each item gets 3-4 bullet points max
+- Include personal opinions ("my fav is...", "I love this because...")
+- Mix features with emotional benefits
+- End with soft CTA or recommendation
 
 Example JSON response:
 {
@@ -154,63 +203,68 @@ Example JSON response:
     },
     {
       "slideNumber": 2,
-      "text": "Cherish\\nSeven journal formats, cozy music, special prompts",
+      "text": "Cherish\\nSeven journal formats\\nCozy music while you write\\nSpecial prompts for birthdays",
       "suggestedImageKeyword": "cozy journaling"
     },
     {
       "slideNumber": 3,
-      "text": "Mood Chonk\\nTrack moods, gratitude journal, super cute",
+      "text": "Mood Chonk\\nTrack moods\\nGratitude journal\\nSuper cute",
       "suggestedImageKeyword": "mood tracking journal"
     },
     {
       "slideNumber": 4,
-      "text": "Stoic\\nClean UI, morning prep & evening reflection",
+      "text": "Stoic\\nClean UI\\nMorning + evening reflections\\nWrite your own haiku",
       "suggestedImageKeyword": "minimalist journaling"
     },
     {
       "slideNumber": 5,
-      "text": "Ghost Diary\\nTag moods & activities, no ads",
+      "text": "Ghost Diary\\nTag moods & activities\\nNo ads",
       "suggestedImageKeyword": "digital diary"
     }
   ],
   "globalSuggestedImageTerm": "journaling"
 }`,
 
-    "Top 10": `Numbered list format with brief descriptions for each item. Ideal for rankings, tips, and must-haves. Each slide should present one item with its number (e.g., '#1: ...', '#2: ...').
+    "Top 10": `**TOP X** (Ranked/numbered list)
+- Open with a specific number and bold claim
+- Each slide = one item with clear explanation
+- Use second person ("you need", "this helps you")
+- Include specific details (dosages, names, statistics)
+- Close with strongest item or summary
 
 Example JSON response:
 {
   "slides": [
     {
       "slideNumber": 1,
-      "text": "3 Supplements you need to be taking as a natty lifter",
+      "text": "3 Supplements you need as a natty lifter",
       "suggestedImageKeyword": "supplements fitness"
     },
     {
       "slideNumber": 2,
-      "text": "1) Fish Oil\\nRich in omega-3s, reduces inflammation",
+      "text": "1) Fish Oil\\nRich in omega-3s, reduces inflammation, supports recovery",
       "suggestedImageKeyword": "fish oil capsules"
     },
     {
       "slideNumber": 3,
-      "text": "2) Magnesium Glucinate\\nBetter sleep, less cramps",
+      "text": "2) Magnesium Glycinate\\nBetter sleep, less cramps",
       "suggestedImageKeyword": "magnesium supplement"
     },
     {
       "slideNumber": 4,
-      "text": "3) Vitamin D 10,000 IUs\\nBoosts testosterone & mood",
+      "text": "3) Vitamin D 10,000 IUs\\nBoosts testosterone, mood, and immune health",
       "suggestedImageKeyword": "vitamin d sunshine"
-    },
-    {
-      "slideNumber": 5,
-      "text": "4) Zinc\\nSupports recovery & immune health",
-      "suggestedImageKeyword": "zinc supplement"
     }
   ],
   "globalSuggestedImageTerm": "fitness supplements"
 }`,
 
-    "Hard Sell": `Direct, benefit-focused messaging with minimal text per slide. Ends with a clear call-to-action. Emphasize benefits and urgency using persuasive language.
+    "Hard Sell": `**HARD SELL** (Direct product push)
+- Ultra-short lines (2-5 words per slide)
+- Focus on product benefits, not features
+- Create rhythm through repetition
+- End with clear CTA and urgency
+- Works best with strong visuals
 
 Example JSON response:
 {
@@ -242,6 +296,35 @@ Example JSON response:
     }
   ],
   "globalSuggestedImageTerm": "premium clothing"
+}`,
+
+    Minimal: `**MINIMAL** (Clean and aesthetic)
+- One clear idea per slide
+- No fluff, every word earns its place
+- Whitespace is your friend
+- Let the design carry weight
+- Subtle, sophisticated language
+
+Example JSON response:
+{
+  "slides": [
+    {
+      "slideNumber": 1,
+      "text": "Less is more",
+      "suggestedImageKeyword": "minimalist design"
+    },
+    {
+      "slideNumber": 2,
+      "text": "Quality over quantity",
+      "suggestedImageKeyword": "premium quality"
+    },
+    {
+      "slideNumber": 3,
+      "text": "Designed for life",
+      "suggestedImageKeyword": "timeless design"
+    }
+  ],
+  "globalSuggestedImageTerm": "minimalism"
 }`,
   }
 

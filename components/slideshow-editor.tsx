@@ -229,15 +229,6 @@ export default function SlideshowEditor({ formData, slideshowData, onBack }: Sli
   // Display search results if available, otherwise show suggested images
   const displayedImages = searchResults.length > 0 ? searchResults : suggestedImages
 
-  // Debug logging
-  console.log("🖼️ Suggested Images Debug:", {
-    hasSlideshowData: !!slideshowData,
-    hasReplacementImages: !!slideshowData?.suggestedReplacementImages,
-    replacementImagesCount: slideshowData?.suggestedReplacementImages?.length || 0,
-    globalTerm: slideshowData?.globalSuggestedImageTerm,
-    usingMockImages: !slideshowData?.suggestedReplacementImages || slideshowData.suggestedReplacementImages.length === 0,
-  })
-
   const updateSlide = (updates: Partial<Slide>) => {
     setSlides((prev) => prev.map((slide, idx) => (idx === currentSlideIndex ? { ...slide, ...updates } : slide)))
   }
@@ -628,6 +619,7 @@ export default function SlideshowEditor({ formData, slideshowData, onBack }: Sli
                     <span
                       key={idx}
                       style={{
+                        whiteSpace: 'pre-line', // Preserve newlines within each span
                         textShadow: segment.isEmoji
                           ? 'none'
                           : generateTextStroke(

@@ -56,6 +56,9 @@ FINAL FEATURES:
 * fix the landing page
 * make the prompts better (use better vocab, use shorter sentences)
 * finish proper stylisation of everything
+* maybe just change the loading thing
+* host the website
+* reset to AI button??
 
 
 slideshow examples:
@@ -161,6 +164,100 @@ Get it in the link in bio
 
 ---
 
+More examples:
+
+how to play with someone's mind
+
+if someone is crying, ask them "do you want some sand?" confusion actually imrpoves mood.
+
+making someone else believe you are mental will make them not want to deal with you. this is a great self defence trick
+
+those that block you on social media are the most toxic people in your life. check who blocked you share > more > blocked
+
+if you are in a ogrup setting and you notice that someone is mocking you, syare in their eyes and smile... they will feel scared
+
+Read people like a book with FREE audio books in my bio
+
+------
+
+5 things she'll never tell you but secretly wants
+
+1) she wants you to lead without conotrlling her. directions turn her on - control pushers her away
+
+2) she craves reassurance more than you think. even the strongest women have silent douvts.
+
+3) she needs to feel chosen even on your busiest days. it's not about time it's about effort
+
+4) she watches how you treat her in private and public. Consistency means everything.
+
+5) she doesn't need you perfect. she just needs you present.
+
+-----
+
+the best mental health advice i was ever given
+
+1) you don't need a breadk you need a life you don't want to escape from. Rest doesn't fix burnout when your whole routine is the problem.
+
+2) stop venting to people who don't want to see you win. half of them are just glad it's you and not them.
+
+3) get out of your head and into your body. the overthinking stops when you move. walk . lift. breathe. sweat. it's not that deep
+
+4) your phone is the reason you feel so anxious. you scroll past 1000 people a day and wonder why you don't know who you are
+
+5) if you wake up sad every day, stop sleeping next to chaos. fix your room. cut off the man. clean your space. energy is real.
+
+6) you;re not broke. you're just overstimulated, and under-connectedt to yourself. turn the volume down on the world.
+
+7) healing isn't cute. it's lonely. it's boring. it's silent. that's why most people never do it.
+
+----
+
+how i turned my life around in 2 years 
+(my full transformation)
+
+failed school and worked two jobs to make up for it...
+
+dropped out to chase the vision of exactly who i wanted to become...
+
+got kicked out and became homeless...
+
+realised it's me against the world 
+i had to do more...
+
+started an SMMA (social media marketing agency)
+it was hard at first until...
+
+i signed my first client
+
+that gave me the boost to keep pushing so i locked in...
+
+started building relationships and connecting investors together...
+
+hit 15k/month couldn't sleep for days...
+
+started my private members club, MM Collective.
+
+everything was good...
+until i made the wrong decisions and lost it all.
+
+felt like i lost myself...
+the fire, the drive, even my smile
+
+went back to the drawing board... and made a comeback
+
+started giving back, buying things for people around me that i always wanted to
+
+met some of the biggest names in the game
+
+remember 
+god has a plan for each of us. even when it feels like everything is falling aparts, he's just setting us up for something greater. trust in him, keep pushing, and never give up your breakthrough is coming
+
+-----
+
+
+
+
+moved into my dream apartment
 
 Prompt testing
 
