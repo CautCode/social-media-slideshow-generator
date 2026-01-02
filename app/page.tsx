@@ -1,8 +1,10 @@
 import Link from "next/link"
 import { ArrowRight, Sparkles } from "lucide-react"
+import { SimplePasswordGate } from "@/components/simple-password-gate"
 
 export default function LandingPage() {
   return (
+    <SimplePasswordGate>
     <main className="h-screen bg-background dark:bg-black text-foreground dark:text-white overflow-hidden flex flex-col">
       {/* Animated gradient background */}
       <div className="fixed inset-0 z-0">
@@ -25,7 +27,7 @@ export default function LandingPage() {
         {/* Nav */}
         <nav className="flex items-center justify-center px-6 lg:px-12 py-4">
           <span className="text-3xl font-black tracking-tight text-foreground dark:text-white italic font-[family-name:var(--font-tiktok-sans)]">
-            SlideGen
+            SlideStudio
           </span>
         </nav>
 
@@ -73,5 +75,6 @@ export default function LandingPage() {
         </section>
       </div>
     </main>
+    </SimplePasswordGate>
   )
 }

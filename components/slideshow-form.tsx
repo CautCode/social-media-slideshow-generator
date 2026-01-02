@@ -107,7 +107,7 @@ export default function SlideshowForm({ initialData, currentStep, onStepChange }
         {/* Logo */}
         <div className="text-center mb-8">
           <h1 className="text-3xl font-black tracking-tight text-foreground italic font-[family-name:var(--font-tiktok-sans)]">
-            SlideGen
+            SlideStudio
           </h1>
         </div>
 

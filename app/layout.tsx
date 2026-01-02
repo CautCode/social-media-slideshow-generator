@@ -23,7 +23,7 @@ const tiktokSans = TikTok_Sans({
 })
 
 export const metadata: Metadata = {
-  title: 'SlideGen - AI-Powered Social Media Slideshow Generator',
+  title: 'SlideStudio - AI-Powered Social Media Slideshow Generator',
   description: 'Create stunning carousel posts for Instagram, TikTok, and more. AI-generated copy, stock photos, and a powerful visual editor.',
   icons: {
     icon: [

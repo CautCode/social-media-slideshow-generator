@@ -480,7 +480,7 @@ export default function SlideshowEditor({ formData, slideshowData, onBack }: Sli
             Back
           </Button>
           <span className="text-xl font-black tracking-tight text-foreground italic font-[family-name:var(--font-tiktok-sans)]">
-            SlideGen
+            SlideStudio
           </span>
         </div>
         <div className="text-sm font-medium">
