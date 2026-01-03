@@ -46,20 +46,9 @@ GenAI Implementation: Documentation of how you used AI to assist in coding or de
 
 Would you like me to help you draft the specific "User Stories" for these features to include in your Proposed Solution section?
 
-FINAL FEATURES:
-* PROPER LANGGRAPH FLOW FOR BETTER SLIDESHOWS
--- added examples
--- simplified graph structure
-* STYLING UPGRADE WITH LANDING PAGE
-* add loading after creating the slideshow
-* fix the rounded corners issue
-* fix the landing page
-* make the prompts better (use better vocab, use shorter sentences)
-* finish proper stylisation of everything
-* maybe just change the loading thing
+FINAL FEATURES
 * host the website
 * reset to AI button??
-
 
 slideshow examples:
 --- 1) Top X ---

@@ -117,7 +117,7 @@ export function SimplePasswordGate({ children }: SimplePasswordGateProps) {
         </form>
 
         <p className="text-xs text-center text-muted-foreground mt-6">
-          This is a university project. Contact the creator for access.
+          Contact the creator for access.
         </p>
       </div>
     </div>
