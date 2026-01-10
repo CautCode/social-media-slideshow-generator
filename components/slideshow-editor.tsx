@@ -59,7 +59,7 @@ type SlideshowEditorProps = {
 /**
  * Generate a text stroke effect using multiple text shadows in concentric rings.
  * This avoids the jagged edges and artifacts of -webkit-text-stroke which traces
- * font glyph paths and creates sharp corners on letters like D, F, L.
+ * font glyph paths and creates sharp corners on letters like W, N, M, V.
  *
  * Uses concentric rings with 16 directions each for smooth coverage at any width.
  * - Thin strokes (1-3px): 1 ring, 16 shadows

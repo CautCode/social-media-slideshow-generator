@@ -25,23 +25,6 @@ const tiktokSans = TikTok_Sans({
 export const metadata: Metadata = {
   title: 'SlideStudio - AI-Powered Social Media Slideshow Generator',
   description: 'Create stunning carousel posts for Instagram, TikTok, and more. AI-generated copy, stock photos, and a powerful visual editor.',
-  icons: {
-    icon: [
-      {
-        url: '/icon-light-32x32.png',
-        media: '(prefers-color-scheme: light)',
-      },
-      {
-        url: '/icon-dark-32x32.png',
-        media: '(prefers-color-scheme: dark)',
-      },
-      {
-        url: '/icon.svg',
-        type: 'image/svg+xml',
-      },
-    ],
-    apple: '/apple-icon.png',
-  },
 }
 
 export default function RootLayout({

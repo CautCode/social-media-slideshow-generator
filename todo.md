@@ -47,8 +47,8 @@ GenAI Implementation: Documentation of how you used AI to assist in coding or de
 Would you like me to help you draft the specific "User Stories" for these features to include in your Proposed Solution section?
 
 FINAL FEATURES
+* fix icon and title of the page
 * host the website
-* reset to AI button??
 
 slideshow examples:
 --- 1) Top X ---
