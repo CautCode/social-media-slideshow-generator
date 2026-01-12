@@ -4,7 +4,7 @@ AI-powered tool for creating Instagram/TikTok carousel slideshows.
 
 ## Links
 
-- **Live Demo**: [alex-berard-slide-studio.vercel.app](https://alex-berard-slide-studio.vercel.app/) (password: 220963361)
+- **Live Demo**: [alex-berard-slide-studio.vercel.app](https://alex-berard-slide-studio.vercel.app/)
 - **Video Demo**: [Google Drive](https://drive.google.com/file/d/1OtU8fbwK9JlKJB88jKQbpVjRM-L_3b8f/view?usp=drive_link)
 
 ## Features

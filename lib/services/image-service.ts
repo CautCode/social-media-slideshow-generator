@@ -31,8 +31,7 @@ export async function fetchSlideImages(
         }
 
         return { imageUrl: undefined, imageMetadata: undefined }
-      } catch (error) {
-        console.error(`Error fetching image for slide ${index + 1}:`, error)
+      } catch {
         return { imageUrl: undefined, imageMetadata: undefined }
       }
     })
@@ -54,20 +53,15 @@ export async function fetchAlternativeImages(
       ? `${globalSuggestedImageTerm} ${imageVibe}`
       : globalSuggestedImageTerm
 
-    console.log("🔎 Fetching alternative images with query:", searchQuery)
     const photos = await searchPexelsPhotos(searchQuery, 3)
 
-    const alternativeImages = photos.map((photo) => ({
+    return photos.map((photo) => ({
       url: photo.url,
       photographer: photo.photographer,
       photographerUrl: photo.photographerUrl,
       alt: photo.alt,
     }))
-
-    console.log("✅ Fetched", alternativeImages.length, "alternative images")
-    return alternativeImages
-  } catch (error) {
-    console.error("Error fetching alternative images:", error)
+  } catch {
     return []
   }
 }

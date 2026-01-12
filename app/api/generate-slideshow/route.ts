@@ -20,7 +20,6 @@ export async function POST(request: NextRequest) {
     const validatedData = RequestSchema.parse(body)
 
     if (!process.env.OPENAI_API_KEY) {
-      console.error("OPENAI_API_KEY is not set")
       return NextResponse.json(
         {
           success: false,
@@ -43,19 +42,11 @@ export async function POST(request: NextRequest) {
       template: validatedData.template,
     }
 
-    console.log("🎬 Generating slideshow with data:", {
-      promotion: formData.promotion.substring(0, 50) + "...",
-      audience: formData.audience,
-      slideCount: formData.slideCount,
-      template: formData.template,
-    })
-
     const result = await graph.invoke({
       formData,
     })
 
     if (result.error) {
-      console.error("❌ Graph execution error:", result.error)
       return NextResponse.json(
         {
           success: false,
@@ -67,7 +58,6 @@ export async function POST(request: NextRequest) {
     }
 
     if (!result.slideshowContent) {
-      console.error("❌ No slideshow content generated")
       return NextResponse.json(
         {
           success: false,
@@ -76,9 +66,6 @@ export async function POST(request: NextRequest) {
         { status: 500 }
       )
     }
-
-    console.log("✅ Generated slideshow content:")
-    console.log(JSON.stringify(result.slideshowContent, null, 2))
 
     return NextResponse.json(
       {
@@ -89,7 +76,6 @@ export async function POST(request: NextRequest) {
     )
   } catch (error) {
     if (error instanceof z.ZodError) {
-      console.error("❌ Validation error:", error.errors)
       return NextResponse.json(
         {
           success: false,
@@ -100,7 +86,6 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    console.error("❌ Unexpected error in generate-slideshow API:", error)
     return NextResponse.json(
       {
         success: false,

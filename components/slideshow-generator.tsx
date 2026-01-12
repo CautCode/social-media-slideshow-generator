@@ -53,7 +53,6 @@ export default function SlideshowGenerator() {
   }
 
   const handleGenerate = async () => {
-    console.log("🎬 Calling API to generate slideshow...")
     setIsGenerating(true)
 
     try {
@@ -66,20 +65,13 @@ export default function SlideshowGenerator() {
       const result = await response.json()
 
       if (result.success) {
-        console.log("✅ Slideshow generated successfully!")
-        console.log("Generated content:", result.data)
         setGeneratedSlideshow(result.data)
         setIsGenerating(false)
         setStep(4)
       } else {
-        console.error("❌ Generation failed:", result.error)
-        if (result.details) {
-          console.error("Error details:", result.details)
-        }
         setIsGenerating(false)
       }
-    } catch (error) {
-      console.error("❌ API call failed:", error)
+    } catch {
       setIsGenerating(false)
     }
   }

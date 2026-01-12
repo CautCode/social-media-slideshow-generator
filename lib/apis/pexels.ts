@@ -70,7 +70,6 @@ export async function searchPexelsPhotos(
       alt: photo.alt || query,
     }))
   } catch (error) {
-    console.error("Error fetching Pexels photos:", error)
     throw error
   }
 }
@@ -107,7 +106,6 @@ export async function getCuratedPexelsPhotos(
       alt: photo.alt || "Curated photo",
     }))
   } catch (error) {
-    console.error("Error fetching curated Pexels photos:", error)
     throw error
   }
 }

@@ -166,7 +166,6 @@ export default function SlideshowEditor({ formData, slideshowData, onBack }: Sli
   const canvasRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
-    console.log('[SlideshowEditor] Slideshow data changed, regenerating slides')
     const newSlides = generateSlides()
     setSlides(newSlides)
     setCurrentSlideIndex(0)
@@ -299,7 +298,6 @@ export default function SlideshowEditor({ formData, slideshowData, onBack }: Sli
       imageUrl,
       imageMetadata: metadata
         ? {
-            url: imageUrl,
             photographer: metadata.photographer,
             photographerUrl: metadata.photographerUrl,
             alt: metadata.alt,
@@ -324,8 +322,7 @@ export default function SlideshowEditor({ formData, slideshowData, onBack }: Sli
 
       const data = await response.json()
       setSearchResults(data.images || [])
-    } catch (error) {
-      console.error("Error searching images:", error)
+    } catch {
       setSearchResults([])
     } finally {
       setIsSearching(false)
@@ -342,41 +339,27 @@ export default function SlideshowEditor({ formData, slideshowData, onBack }: Sli
   }
 
   const handleExport = async () => {
-    console.log('[handleExport] Export button clicked')
-    console.log('[handleExport] canvasRef.current:', canvasRef.current)
-    console.log('[handleExport] currentSlideIndex:', currentSlideIndex)
-    console.log('[handleExport] currentSlide:', currentSlide)
-
     if (!canvasRef.current) {
-      console.error('[handleExport] Canvas ref not available')
       return
     }
 
-    console.log('[handleExport] Setting isExporting to true')
     setIsExporting(true)
 
     try {
-      console.log('[handleExport] Calling exportSlideAsPNG...')
       await exportSlideAsPNG(canvasRef.current, {
         slideNumber: currentSlideIndex + 1,
         text: currentSlide.text,
         imageUrl: currentSlide.imageUrl,
       })
-      console.log('[handleExport] Export completed successfully')
-    } catch (error) {
-      console.error('[handleExport] Export failed:', error)
+    } catch {
       alert('Failed to export slide. Please try again.')
     } finally {
-      console.log('[handleExport] Setting isExporting to false')
       setIsExporting(false)
     }
   }
 
   const handleExportAll = async () => {
-    console.log('[handleExportAll] Bulk export button clicked')
-
     if (!canvasRef.current) {
-      console.error('[handleExportAll] Canvas ref not available')
       return
     }
 
@@ -399,33 +382,20 @@ export default function SlideshowEditor({ formData, slideshowData, onBack }: Sli
           imageUrl: slide.imageUrl,
         })),
         (progress) => {
-          console.log('[handleExportAll] Progress:', progress)
           setExportProgress(progress)
         },
         async (slideIndex) => {
-          const imgBefore = canvasRef.current?.querySelector('img')
-          console.log('[DEBUG] BEFORE state change:')
-          console.log('  - Current img.src:', imgBefore?.src.substring(0, 100))
-          console.log('  - Expected imageUrl:', slides[slideIndex].imageUrl.substring(0, 100))
-
           flushSync(() => {
             setCurrentSlideIndex(slideIndex)
           })
 
           await new Promise((resolve) => requestAnimationFrame(resolve))
           await new Promise((resolve) => requestAnimationFrame(resolve))
-
-          const imgAfter = canvasRef.current?.querySelector('img')
-          console.log('[DEBUG] AFTER state change:')
-          console.log('  - New img.src:', imgAfter?.src.substring(0, 100))
-          console.log('  - Match:', imgAfter?.src.includes(slides[slideIndex].imageUrl))
         }
       )
 
-      console.log('[handleExportAll] Bulk export completed successfully')
       alert(`Successfully exported all ${slides.length} slides as ZIP file!`)
     } catch (error) {
-      console.error('[handleExportAll] Bulk export failed:', error)
       const errorMessage = error instanceof Error ? error.message : 'Unknown error'
       alert(`Export failed: ${errorMessage}`)
     } finally {

@@ -52,7 +52,6 @@ async function generateSlideshow(
       error: undefined,
     }
   } catch (error) {
-    console.error("Error in generateSlideshow node:", error)
     return {
       error: error instanceof Error ? error.message : "Unknown error occurred",
     }
@@ -288,36 +287,7 @@ Example JSON response:
     }
   ],
   "globalSuggestedImageTerm": "premium clothing"
-}`,
-
-    Minimal: `**MINIMAL** (Clean and aesthetic)
-- One clear idea per slide
-- No fluff, every word earns its place
-- Whitespace is your friend
-- Let the design carry weight
-- Subtle, sophisticated language
-
-Example JSON response:
-{
-  "slides": [
-    {
-      "slideNumber": 1,
-      "text": "Less is more",
-      "suggestedImageKeyword": "minimalist design"
-    },
-    {
-      "slideNumber": 2,
-      "text": "Quality over quantity",
-      "suggestedImageKeyword": "premium quality"
-    },
-    {
-      "slideNumber": 3,
-      "text": "Designed for life",
-      "suggestedImageKeyword": "timeless design"
-    }
-  ],
-  "globalSuggestedImageTerm": "minimalism"
-}`,
+}`
   }
 
   return llmGuidance[template] || ""
@@ -356,8 +326,7 @@ async function enrichWithImages(
       },
       error: undefined,
     }
-  } catch (error) {
-    console.error("Error enriching with images:", error)
+  } catch {
     return { error: undefined }
   }
 }

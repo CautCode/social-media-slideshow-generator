@@ -14,7 +14,6 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json({ images }, { status: 200 })
   } catch (error) {
-    console.error("Error searching images:", error)
     return NextResponse.json(
       { error: "Failed to search images", details: error instanceof Error ? error.message : "Unknown error" },
       { status: 500 }
