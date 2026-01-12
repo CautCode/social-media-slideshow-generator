@@ -1,30 +1,34 @@
-# Slideshow Generator Form
+# Social Media Slideshow Generator
 
-*Automatically synced with your [v0.app](https://v0.app) deployments*
+AI-powered tool for creating Instagram/TikTok carousel slideshows.
 
-[![Deployed on Vercel](https://img.shields.io/badge/Deployed%20on-Vercel-black?style=for-the-badge&logo=vercel)](https://vercel.com/berardalexander-gmailcoms-projects/v0-slideshow-generator-form)
-[![Built with v0](https://img.shields.io/badge/Built%20with-v0.app-black?style=for-the-badge)](https://v0.app/chat/eJSlIUmNIRW)
+## Links
 
-## Overview
+- **Live Demo**: [alex-berard-slide-studio.vercel.app](https://alex-berard-slide-studio.vercel.app/) (password: 220963361)
+- **Video Demo**: [Google Drive](https://drive.google.com/file/d/1OtU8fbwK9JlKJB88jKQbpVjRM-L_3b8f/view?usp=drive_link)
 
-This repository will stay in sync with your deployed chats on [v0.app](https://v0.app).
-Any changes you make to your deployed app will be automatically pushed to this repository from [v0.app](https://v0.app).
+## Features
 
-## Deployment
+- **AI Content Generation** - Generates headlines, body text, and image keywords using GPT-4o-mini
+- **Stock Photo Integration** - Automatic image sourcing from Pexels API
+- **Visual Editor** - Drag-and-drop text positioning, font customization, image adjustments
+- **Export** - Download slideshows as PNG images
 
-Your project is live at:
+## Setup
 
-**[https://vercel.com/berardalexander-gmailcoms-projects/v0-slideshow-generator-form](https://vercel.com/berardalexander-gmailcoms-projects/v0-slideshow-generator-form)**
+1. Clone the repository
+2. Install dependencies: `npm install`
+3. Create `.env.local` with your API keys:
+   ```
+   OPENAI_API_KEY=your_key_here
+   PEXELS_API_KEY=your_key_here
+   ```
+4. Run the development server: `npm run dev`
 
-## Build your app
+## Tech Stack
 
-Continue building your app on:
-
-**[https://v0.app/chat/eJSlIUmNIRW](https://v0.app/chat/eJSlIUmNIRW)**
-
-## How It Works
-
-1. Create and modify your project using [v0.app](https://v0.app)
-2. Deploy your chats from the v0 interface
-3. Changes are automatically pushed to this repository
-4. Vercel deploys the latest version from this repository
+- Next.js 14
+- TypeScript
+- Tailwind CSS
+- OpenAI API
+- Pexels API
