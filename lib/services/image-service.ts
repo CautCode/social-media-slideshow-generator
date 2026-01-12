@@ -1,27 +1,19 @@
 import { searchPexelsPhotos } from "@/lib/apis/pexels"
 import type { ImageMetadata, GenerateSlideshowRequest, LLMSlideContent } from "@/lib/types/slideshow"
 
-/**
- * Fetch images for each slide from Pexels API
- * Returns array of image results matching slide order
- */
 export async function fetchSlideImages(
   slides: LLMSlideContent[],
   formData: GenerateSlideshowRequest
 ): Promise<Array<{ imageUrl?: string; imageMetadata?: ImageMetadata }>> {
-  // Early return if not using stock photos
   if (formData.imageOption !== "stock") {
     return slides.map(() => ({ imageUrl: undefined, imageMetadata: undefined }))
   }
 
-  // Fetch images in parallel for all slides
   const imageResults = await Promise.all(
     slides.map(async (slide) => {
       try {
-        // Use suggestedImageKeyword from slide (now always present)
         const query = slide.suggestedImageKeyword
 
-        // Add image vibe to query if provided
         const searchQuery = formData.imageVibe ? `${query} ${formData.imageVibe}` : query
 
         const photos = await searchPexelsPhotos(searchQuery, 1)
@@ -49,21 +41,15 @@ export async function fetchSlideImages(
   return imageResults
 }
 
-/**
- * Fetch alternative/replacement images using the global suggested term
- * Returns array of 3 images or empty array on failure
- */
 export async function fetchAlternativeImages(
   globalSuggestedImageTerm: string | undefined,
   imageVibe: string | undefined
 ): Promise<ImageMetadata[]> {
-  // Early return if no global term
   if (!globalSuggestedImageTerm) {
     return []
   }
 
   try {
-    // Build search query with optional image vibe
     const searchQuery = imageVibe
       ? `${globalSuggestedImageTerm} ${imageVibe}`
       : globalSuggestedImageTerm
@@ -82,6 +68,6 @@ export async function fetchAlternativeImages(
     return alternativeImages
   } catch (error) {
     console.error("Error fetching alternative images:", error)
-    return [] // Non-critical failure, return empty array
+    return []
   }
 }

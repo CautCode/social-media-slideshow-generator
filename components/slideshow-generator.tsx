@@ -77,12 +77,10 @@ export default function SlideshowGenerator() {
           console.error("Error details:", result.details)
         }
         setIsGenerating(false)
-        // TODO: Show error to user
       }
     } catch (error) {
       console.error("❌ API call failed:", error)
       setIsGenerating(false)
-      // TODO: Show error to user
     }
   }
 

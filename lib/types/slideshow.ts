@@ -1,6 +1,5 @@
 import { z } from "zod"
 
-// Zod schema for image metadata
 export const ImageMetadataSchema = z.object({
   url: z.string().url(),
   photographer: z.string().optional(),
@@ -10,8 +9,6 @@ export const ImageMetadataSchema = z.object({
 
 export type ImageMetadata = z.infer<typeof ImageMetadataSchema>
 
-// Zod schema for LLM-generated slide content (without image fields)
-// This is what the LLM generates via structured output
 export const LLMSlideContentSchema = z.object({
   slideNumber: z.number().min(1).max(10),
   text: z.string().min(1).max(500),
@@ -20,7 +17,6 @@ export const LLMSlideContentSchema = z.object({
 
 export type LLMSlideContent = z.infer<typeof LLMSlideContentSchema>
 
-// Zod schema for the LLM response (without images)
 export const LLMSlideshowResponseSchema = z.object({
   slides: z.array(LLMSlideContentSchema),
   globalSuggestedImageTerm: z.string(),
@@ -28,7 +24,6 @@ export const LLMSlideshowResponseSchema = z.object({
 
 export type LLMSlideshowResponse = z.infer<typeof LLMSlideshowResponseSchema>
 
-// Zod schema for a complete slide (with image fields added later)
 export const SlideContentSchema = z.object({
   slideNumber: z.number().min(1).max(10),
   text: z.string().min(1).max(500),
@@ -39,7 +34,6 @@ export const SlideContentSchema = z.object({
 
 export type SlideContent = z.infer<typeof SlideContentSchema>
 
-// Zod schema for the complete slideshow response (with images)
 export const SlideshowResponseSchema = z.object({
   slides: z.array(SlideContentSchema),
   globalSuggestedImageTerm: z.string().optional(),
@@ -48,7 +42,6 @@ export const SlideshowResponseSchema = z.object({
 
 export type SlideshowResponse = z.infer<typeof SlideshowResponseSchema>
 
-// API Request type (extends FormData from slideshow-generator.tsx)
 export type GenerateSlideshowRequest = {
   promotion: string
   audience: string
@@ -60,7 +53,6 @@ export type GenerateSlideshowRequest = {
   template: string
 }
 
-// API Response type
 export type GenerateSlideshowResponse =
   | {
       success: true

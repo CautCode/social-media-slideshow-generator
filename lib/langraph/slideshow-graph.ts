@@ -9,29 +9,25 @@ import {
 } from "@/lib/types/slideshow"
 import { fetchSlideImages, fetchAlternativeImages } from "@/lib/services/image-service"
 
-// Define the state annotation for our graph
 const GraphStateAnnotation = Annotation.Root({
   formData: Annotation<GenerateSlideshowRequest>,
   slideshowContent: Annotation<SlideshowResponse | undefined>,
   error: Annotation<string | undefined>,
 })
 
-// Initialize the LLM
 function createLLM() {
   return new ChatOpenAI({
-    modelName: "gpt-4o-mini", // Cost-effective model for testing
+    modelName: "gpt-4o-mini",
     temperature: 0.7,
     openAIApiKey: process.env.OPENAI_API_KEY,
   })
 }
 
-// Create LLM with structured output (using LLM schema without image fields)
 function createStructuredLLM() {
   const llm = createLLM()
   return llm.withStructuredOutput(LLMSlideshowResponseSchema)
 }
 
-// Node function: Generate slideshow content
 async function generateSlideshow(
   state: typeof GraphStateAnnotation.State
 ): Promise<Partial<typeof GraphStateAnnotation.State>> {
@@ -42,8 +38,6 @@ async function generateSlideshow(
     const structuredLLM = createStructuredLLM()
     const llmResponse = (await structuredLLM.invoke([new HumanMessage(prompt)])) as LLMSlideshowResponse
 
-    // Convert LLM response to full SlideshowResponse format
-    // Image fields will be added later by the enrichWithImages node
     const slideshowContent: SlideshowResponse = {
       slides: llmResponse.slides.map((slide) => ({
         ...slide,
@@ -65,7 +59,6 @@ async function generateSlideshow(
   }
 }
 
-// Helper function to build the prompt
 function buildPrompt(formData: GenerateSlideshowRequest): string {
   const templateGuidance = getTemplateGuidance(formData.template)
 
@@ -144,7 +137,6 @@ These examples are already included in the template guidance above.
 Now generate slideshow content for the inputs provided above.`
 }
 
-// Helper function for template-specific guidance
 function getTemplateGuidance(template: string): string {
   const llmGuidance: Record<string, string> = {
     Bold: `**BOLD** (Story-driven reveal)
@@ -331,7 +323,6 @@ Example JSON response:
   return llmGuidance[template] || ""
 }
 
-// Node function: Enrich slideshow with images from Pexels
 async function enrichWithImages(
   state: typeof GraphStateAnnotation.State
 ): Promise<Partial<typeof GraphStateAnnotation.State>> {
@@ -342,19 +333,16 @@ async function enrichWithImages(
   }
 
   try {
-    // Fetch slide-specific images using service layer
     const imageResults = await fetchSlideImages(
       slideshowContent.slides,
       formData
     )
 
-    // Merge slides with images
     const slidesWithImages = slideshowContent.slides.map((slide, index) => ({
       ...slide,
       ...imageResults[index],
     }))
 
-    // Fetch alternative images using service layer
     const alternativeImages = await fetchAlternativeImages(
       slideshowContent.globalSuggestedImageTerm,
       formData.imageVibe
@@ -370,23 +358,18 @@ async function enrichWithImages(
     }
   } catch (error) {
     console.error("Error enriching with images:", error)
-    // Don't fail - return slides without images
     return { error: undefined }
   }
 }
 
-// Build the graph
 export function createSlideshowGraph() {
   const workflow = new StateGraph(GraphStateAnnotation)
 
-  // Add nodes: content generation + image enrichment
   workflow.addNode("generate", generateSlideshow)
   workflow.addNode("enrichWithImages", enrichWithImages)
 
-  // Set entry point
   workflow.addEdge(START, "generate")
 
-  // Linear flow: generate content → enrich with images → end
   workflow.addEdge("generate", "enrichWithImages")
   workflow.addEdge("enrichWithImages", END)
 

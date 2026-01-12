@@ -6,17 +6,14 @@ export default function SlideshowLoading() {
   return (
     <div className="min-h-screen py-12 px-4 flex items-center justify-center">
       <div className="max-w-[680px] mx-auto w-full">
-        {/* Logo */}
         <div className="text-center mb-8">
           <h1 className="text-3xl font-black tracking-tight text-foreground italic font-[family-name:var(--font-tiktok-sans)]">
             SlideStudio
           </h1>
         </div>
 
-        {/* Loading Card */}
         <Card className="p-12 shadow-lg">
           <div className="flex flex-col items-center justify-center space-y-6">
-            {/* Animated dots */}
             <div className="flex gap-2">
               <div className="w-3 h-3 rounded-full bg-primary animate-bounce [animation-delay:-0.3s]"></div>
               <div className="w-3 h-3 rounded-full bg-primary animate-bounce [animation-delay:-0.15s]"></div>

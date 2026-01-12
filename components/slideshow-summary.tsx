@@ -60,14 +60,12 @@ export default function SlideshowSummary({ data, onBack, onEdit, onGenerate }: P
   return (
     <div className="min-h-screen py-12 px-4">
       <div className="max-w-[680px] mx-auto">
-        {/* Logo */}
         <div className="text-center mb-8">
           <h1 className="text-3xl font-black tracking-tight text-foreground italic font-[family-name:var(--font-tiktok-sans)]">
             SlideStudio
           </h1>
         </div>
 
-        {/* Breadcrumb Progress Indicator */}
         <div className="mb-8">
           <div className="flex items-center justify-center gap-2 text-sm">
             <span className="text-muted-foreground">
@@ -84,7 +82,6 @@ export default function SlideshowSummary({ data, onBack, onEdit, onGenerate }: P
           </div>
         </div>
 
-        {/* Summary Card */}
         <Card className="p-8 shadow-lg">
           <h2 className="text-2xl font-bold mb-2 text-balance">Ready to generate your slideshow?</h2>
           <p className="text-muted-foreground mb-8">
@@ -112,7 +109,6 @@ export default function SlideshowSummary({ data, onBack, onEdit, onGenerate }: P
               </Card>
             ))}
 
-            {/* Template Style Card with Thumbnail */}
             <Card className="p-5 bg-accent/30 border-border/50">
               <div className="flex items-start justify-between gap-4">
                 <div className="flex-1 min-w-0">
@@ -141,13 +137,11 @@ export default function SlideshowSummary({ data, onBack, onEdit, onGenerate }: P
             </Card>
           </div>
 
-          {/* Estimated Time */}
           <div className="flex items-center justify-center gap-2 text-sm text-muted-foreground mb-8 py-3 px-4 bg-secondary/50 rounded-lg">
             <Clock className="h-4 w-4" />
             <span>Estimated generation time: ~30 seconds</span>
           </div>
 
-          {/* Action Buttons */}
           <div className="flex gap-3">
             <Button
               variant="outline"

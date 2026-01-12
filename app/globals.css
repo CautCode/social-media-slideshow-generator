@@ -4,30 +4,22 @@
 @custom-variant dark (&:is(.dark *));
 
 :root {
-  /* Clean white background */
   --background: hsl(0 0% 100%);
-  /* Dark text */
   --foreground: hsl(0 0% 10%);
-  /* White card */
   --card: hsl(0 0% 100%);
   --card-foreground: hsl(0 0% 10%);
   --popover: hsl(0 0% 100%);
   --popover-foreground: hsl(0 0% 10%);
-  /* Emerald primary */
   --primary: hsl(160 84% 39%);
   --primary-foreground: hsl(0 0% 100%);
-  /* Soft gray secondary */
   --secondary: hsl(0 0% 96%);
   --secondary-foreground: hsl(0 0% 10%);
-  /* Muted gray */
   --muted: hsl(0 0% 96%);
   --muted-foreground: hsl(0 0% 45%);
-  /* Light green accent */
   --accent: hsl(142 76% 95%);
   --accent-foreground: hsl(160 84% 39%);
   --destructive: hsl(0 84.2% 60.2%);
   --destructive-foreground: hsl(0 0% 100%);
-  /* Soft borders */
   --border: hsl(0 0% 90%);
   --input: hsl(0 0% 90%);
   --ring: hsl(160 84% 39%);
@@ -133,7 +125,6 @@
   }
 }
 
-/* Custom gradient background */
 .gradient-bg {
   background: linear-gradient(135deg, hsl(0 0% 100%) 0%, hsl(142 76% 98%) 100%);
 }
@@ -142,7 +133,6 @@
   background: linear-gradient(135deg, hsl(0 0% 8%) 0%, hsl(160 60% 5%) 100%);
 }
 
-/* Landing page animations */
 @keyframes pulse-slow {
   0%, 100% {
     opacity: 0.4;
@@ -166,7 +156,6 @@
   animation-delay: 4s;
 }
 
-/* Hide scrollbar for carousel */
 .scrollbar-hide {
   -ms-overflow-style: none;
   scrollbar-width: none;

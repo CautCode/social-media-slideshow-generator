@@ -56,25 +56,13 @@ type SlideshowEditorProps = {
   onBack: () => void
 }
 
-/**
- * Generate a text stroke effect using multiple text shadows in concentric rings.
- * This avoids the jagged edges and artifacts of -webkit-text-stroke which traces
- * font glyph paths and creates sharp corners on letters like W, N, M, V.
- *
- * Uses concentric rings with 16 directions each for smooth coverage at any width.
- * - Thin strokes (1-3px): 1 ring, 16 shadows
- * - Medium strokes (4-6px): 2-3 rings, 32-48 shadows
- * - Thick strokes (7-10px): 4-5 rings, 64-80 shadows
- */
 function generateTextStroke(width: number, color: string): string {
   if (width <= 0) return 'none'
 
   const shadows: string[] = []
-  const ringSpacing = 2 // pixels between each ring
+  const ringSpacing = 2
 
-  // Create concentric rings from outer edge inward
   for (let radius = width; radius > 0; radius -= ringSpacing) {
-    // 16 directions at 22.5° intervals for each ring
     for (let angle = 0; angle < 360; angle += 22.5) {
       const radians = (angle * Math.PI) / 180
       const x = Math.round(Math.cos(radians) * radius * 100) / 100
@@ -86,28 +74,20 @@ function generateTextStroke(width: number, color: string): string {
   return shadows.join(', ')
 }
 
-/**
- * Split text into segments of regular text and emojis.
- * Emojis will be rendered without text stroke.
- */
 function parseTextWithEmojis(text: string): Array<{ text: string; isEmoji: boolean }> {
-  // Regex to match emojis (including compound emojis with ZWJ and variation selectors)
   const emojiRegex = /(\p{Emoji_Presentation}|\p{Emoji}\uFE0F)/gu
   const segments: Array<{ text: string; isEmoji: boolean }> = []
   let lastIndex = 0
 
   const matches = text.matchAll(emojiRegex)
   for (const match of matches) {
-    // Add text before emoji
     if (match.index! > lastIndex) {
       segments.push({ text: text.slice(lastIndex, match.index), isEmoji: false })
     }
-    // Add emoji
     segments.push({ text: match[0], isEmoji: true })
     lastIndex = match.index! + match[0].length
   }
 
-  // Add remaining text
   if (lastIndex < text.length) {
     segments.push({ text: text.slice(lastIndex), isEmoji: false })
   }
@@ -125,10 +105,8 @@ export default function SlideshowEditor({ formData, slideshowData, onBack }: Sli
     "/professional-meeting.png",
   ]
 
-  // Generate slides from API data or mock data
   const generateSlides = (): Slide[] => {
     if (slideshowData && slideshowData.slides) {
-      // Use real data from API
       return slideshowData.slides.map((slide, i) => ({
         id: `slide-${slide.slideNumber}`,
         imageUrl: slide.imageUrl || defaultImages[i % defaultImages.length],
@@ -148,7 +126,6 @@ export default function SlideshowEditor({ formData, slideshowData, onBack }: Sli
         textBorderColor: "#000000",
       }))
     } else {
-      // Fallback to mock data
       const count = Number.parseInt(formData.slideCount)
       return Array.from({ length: count }, (_, i) => ({
         id: `slide-${i + 1}`,
@@ -188,23 +165,19 @@ export default function SlideshowEditor({ formData, slideshowData, onBack }: Sli
   const [showGrid, setShowGrid] = useState(true)
   const canvasRef = useRef<HTMLDivElement>(null)
 
-  // Regenerate slides when slideshowData or formData changes (new slideshow created)
   useEffect(() => {
     console.log('[SlideshowEditor] Slideshow data changed, regenerating slides')
     const newSlides = generateSlides()
     setSlides(newSlides)
-    setCurrentSlideIndex(0) // Reset to first slide
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+    setCurrentSlideIndex(0)
   }, [slideshowData, formData])
 
-  // Update timestamp when slide changes to force cache busting
   useEffect(() => {
     setSlideChangeTimestamp(Date.now())
   }, [currentSlideIndex])
 
   const currentSlide = slides[currentSlideIndex]
 
-  // Return early if no slide is available
   if (!currentSlide) {
     return (
       <div className="h-screen flex items-center justify-center bg-background">
@@ -213,20 +186,17 @@ export default function SlideshowEditor({ formData, slideshowData, onBack }: Sli
     )
   }
 
-  // Mock image search results (fallback)
   const mockImages = [
     "/business-presentation.png",
     "/modern-office-space.png",
     "/team-collaboration.png",
   ]
 
-  // Use real suggested images if available, fallback to mock
   const suggestedImages =
     slideshowData?.suggestedReplacementImages && slideshowData.suggestedReplacementImages.length > 0
       ? slideshowData.suggestedReplacementImages
       : mockImages.map((url) => ({ url, photographer: undefined, photographerUrl: undefined, alt: undefined }))
 
-  // Display search results if available, otherwise show suggested images
   const displayedImages = searchResults.length > 0 ? searchResults : suggestedImages
 
   const updateSlide = (updates: Partial<Slide>) => {
@@ -413,11 +383,9 @@ export default function SlideshowEditor({ formData, slideshowData, onBack }: Sli
     setIsExportingAll(true)
     setExportProgress({ current: 0, total: slides.length })
 
-    // Save current slide index to restore later
     const originalSlideIndex = currentSlideIndex
 
     try {
-      // Export all slides as ZIP
       await exportAllSlidesAsZip(
         () => {
           if (!canvasRef.current) {
@@ -440,14 +408,12 @@ export default function SlideshowEditor({ formData, slideshowData, onBack }: Sli
           console.log('  - Current img.src:', imgBefore?.src.substring(0, 100))
           console.log('  - Expected imageUrl:', slides[slideIndex].imageUrl.substring(0, 100))
 
-          // Force React to immediately flush this state update to the DOM
           flushSync(() => {
             setCurrentSlideIndex(slideIndex)
           })
 
-          // Wait for browser to paint the new content
           await new Promise((resolve) => requestAnimationFrame(resolve))
-          await new Promise((resolve) => requestAnimationFrame(resolve)) // Double RAF for layout
+          await new Promise((resolve) => requestAnimationFrame(resolve))
 
           const imgAfter = canvasRef.current?.querySelector('img')
           console.log('[DEBUG] AFTER state change:')
@@ -463,7 +429,6 @@ export default function SlideshowEditor({ formData, slideshowData, onBack }: Sli
       const errorMessage = error instanceof Error ? error.message : 'Unknown error'
       alert(`Export failed: ${errorMessage}`)
     } finally {
-      // Restore original slide
       setCurrentSlideIndex(originalSlideIndex)
       setIsExportingAll(false)
       setExportProgress({ current: 0, total: 0 })
@@ -472,7 +437,6 @@ export default function SlideshowEditor({ formData, slideshowData, onBack }: Sli
 
   return (
     <div className="h-screen flex flex-col bg-background">
-      {/* Top Bar */}
       <div className="h-14 border-b border-border flex items-center justify-between px-4">
         <div className="flex items-center gap-4">
           <Button variant="ghost" size="sm" onClick={onBack}>
@@ -507,11 +471,8 @@ export default function SlideshowEditor({ formData, slideshowData, onBack }: Sli
         </div>
       </div>
 
-      {/* Main Content */}
       <div className="flex-1 flex overflow-hidden">
-        {/* Center: Canvas */}
         <div className="flex-1 flex flex-col items-center justify-center bg-muted/10 p-8 overflow-auto relative">
-          {/* Zoom Slider & Grid Toggle - Sticky */}
           <div className="absolute top-3 left-3 z-10 flex items-center gap-3 bg-background/95 backdrop-blur-sm border border-border rounded-md px-3 py-1.5 shadow-md">
             <span className="text-xs font-medium whitespace-nowrap">Zoom: {zoom}%</span>
             <Slider
@@ -549,7 +510,6 @@ export default function SlideshowEditor({ formData, slideshowData, onBack }: Sli
                 height: '400px',
               }}
             >
-            {/* Background Image */}
             <img
               key={`slide-${currentSlideIndex}-${slideChangeTimestamp}`}
               src={`${currentSlide.imageUrl || "/placeholder.svg"}${(currentSlide.imageUrl || "").includes('?') ? '&' : '?'}cb=${slideChangeTimestamp}`}
@@ -561,13 +521,11 @@ export default function SlideshowEditor({ formData, slideshowData, onBack }: Sli
               }}
             />
 
-            {/* Overlay */}
             <div
               className="absolute inset-0 bg-black pointer-events-none"
               style={{ opacity: currentSlide.overlayOpacity / 100 }}
             />
 
-            {/* Grid Overlay */}
             {showGrid && (
               <div
                 data-exclude-from-export
@@ -580,7 +538,6 @@ export default function SlideshowEditor({ formData, slideshowData, onBack }: Sli
               />
             )}
 
-            {/* Draggable Text */}
             <div
               className="absolute cursor-move group"
               style={{
@@ -591,13 +548,11 @@ export default function SlideshowEditor({ formData, slideshowData, onBack }: Sli
               }}
               onMouseDown={handleTextMouseDown}
             >
-              {/* Dashed border (editing UI only) */}
               <div
                 data-exclude-from-export
                 className="absolute inset-0 border-2 border-dashed border-primary/50 group-hover:border-primary transition-colors pointer-events-none"
               />
 
-              {/* Text content (included in export) */}
               <div
                 className="w-full h-full flex items-center justify-center"
                 style={{
@@ -619,7 +574,7 @@ export default function SlideshowEditor({ formData, slideshowData, onBack }: Sli
                     <span
                       key={idx}
                       style={{
-                        whiteSpace: 'pre-line', // Preserve newlines within each span
+                        whiteSpace: 'pre-line',
                         textShadow: segment.isEmoji
                           ? 'none'
                           : generateTextStroke(
@@ -634,14 +589,12 @@ export default function SlideshowEditor({ formData, slideshowData, onBack }: Sli
                 </p>
               </div>
 
-              {/* Resize Handle */}
               <div data-exclude-from-export className="resize-handle absolute bottom-0 right-0 w-4 h-4 bg-primary rounded-tl cursor-nwse-resize opacity-0 group-hover:opacity-100 transition-opacity" />
             </div>
           </div>
           </div>
         </div>
 
-        {/* Right: Properties Panel */}
         <div className="w-[320px] border-l border-border bg-background overflow-y-auto">
           <Tabs defaultValue="text" className="w-full">
             <TabsList className="w-full grid grid-cols-3 rounded-none border-b">
@@ -967,7 +920,6 @@ export default function SlideshowEditor({ formData, slideshowData, onBack }: Sli
         </div>
       </div>
 
-      {/* Bottom Bar */}
       <div className="h-24 border-t border-border flex items-center justify-center px-4 bg-muted/30">
         <div className="flex items-center gap-4">
           <Button

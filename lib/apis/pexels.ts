@@ -1,19 +1,3 @@
-/**
- * Pexels API Integration
- *
- * Provides stock photo search functionality using the Pexels API.
- * API Documentation: https://www.pexels.com/api/documentation/
- *
- * Rate Limits:
- * - Default: 200 requests/hour, 20,000 requests/month
- * - Can request unlimited if attribution provided
- *
- * Commercial Use:
- * - ✅ Fully allowed for commercial use
- * - ⚠️ Must show prominent link to Pexels and contributors in application
- */
-
-// Pexels API response types
 export interface PexelsPhoto {
   id: number
   width: number
@@ -52,13 +36,6 @@ export interface PexelsImageResult {
   alt: string
 }
 
-/**
- * Search for photos on Pexels
- *
- * @param query - Search query (e.g., "coffee morning", "business meeting")
- * @param perPage - Number of results to return (max 80)
- * @returns Array of photo results with URLs and attribution
- */
 export async function searchPexelsPhotos(
   query: string,
   perPage: number = 1
@@ -86,7 +63,6 @@ export async function searchPexelsPhotos(
 
     const data: PexelsSearchResponse = await response.json()
 
-    // Map to simplified result format
     return data.photos.map((photo) => ({
       url: photo.src.large,
       photographer: photo.photographer,
@@ -99,15 +75,6 @@ export async function searchPexelsPhotos(
   }
 }
 
-/**
- * Get curated photos from Pexels
- *
- * Returns curated photos that are updated at least once per hour.
- * Useful for fallback when search doesn't return good results.
- *
- * @param perPage - Number of results to return (max 80)
- * @returns Array of photo results with URLs and attribution
- */
 export async function getCuratedPexelsPhotos(
   perPage: number = 1
 ): Promise<PexelsImageResult[]> {
@@ -133,7 +100,6 @@ export async function getCuratedPexelsPhotos(
 
     const data: PexelsSearchResponse = await response.json()
 
-    // Map to simplified result format
     return data.photos.map((photo) => ({
       url: photo.src.large,
       photographer: photo.photographer,

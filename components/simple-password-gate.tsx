@@ -19,14 +19,12 @@ export function SimplePasswordGate({ children }: SimplePasswordGateProps) {
   const pathname = usePathname()
 
   useEffect(() => {
-    // Check if already unlocked in sessionStorage
     if (typeof window !== 'undefined') {
       const unlocked = sessionStorage.getItem('app-unlocked')
 
       if (unlocked === 'true') {
         setIsUnlocked(true)
       } else if (pathname !== '/') {
-        // If not unlocked and not on home page, redirect to home
         router.push('/')
       }
 
@@ -38,10 +36,7 @@ export function SimplePasswordGate({ children }: SimplePasswordGateProps) {
     e.preventDefault()
     setError('')
 
-    // Simple client-side check - just compare with the password
-    // Note: This is NOT secure, but since you're using it for a university project
-    // where you'll give the password to your lecturer, this approach works fine
-    const correctPassword = '220963361' // Your password from .env.local
+    const correctPassword = '220963361'
 
     if (password === correctPassword) {
       sessionStorage.setItem('app-unlocked', 'true')
@@ -53,7 +48,7 @@ export function SimplePasswordGate({ children }: SimplePasswordGateProps) {
   }
 
   if (isLoading) {
-    return null // or a loading spinner
+    return null
   }
 
   if (isUnlocked) {
@@ -62,14 +57,12 @@ export function SimplePasswordGate({ children }: SimplePasswordGateProps) {
 
   return (
     <div className="min-h-screen bg-background dark:bg-black text-foreground dark:text-white flex items-center justify-center px-4">
-      {/* Animated gradient background */}
       <div className="fixed inset-0 z-0">
         <div className="absolute inset-0 bg-gradient-to-br from-emerald-100/50 via-background to-lime-100/30 dark:from-emerald-950/30 dark:via-black dark:to-lime-950/20" />
         <div className="absolute top-0 left-1/4 w-[500px] h-[500px] bg-emerald-500/10 dark:bg-emerald-500/15 rounded-full blur-[120px] animate-pulse-slow" />
         <div className="absolute bottom-0 right-1/4 w-[400px] h-[400px] bg-lime-500/10 dark:bg-lime-500/15 rounded-full blur-[100px] animate-pulse-slow animation-delay-2000" />
       </div>
 
-      {/* Grid overlay */}
       <div
         className="fixed inset-0 z-0 opacity-[0.03] dark:opacity-[0.03]"
         style={{

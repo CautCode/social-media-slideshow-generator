@@ -104,14 +104,12 @@ export default function SlideshowForm({ initialData, currentStep, onStepChange }
   return (
     <div className="min-h-screen py-12 px-4">
       <div className="max-w-[680px] mx-auto">
-        {/* Logo */}
         <div className="text-center mb-8">
           <h1 className="text-3xl font-black tracking-tight text-foreground italic font-[family-name:var(--font-tiktok-sans)]">
             SlideStudio
           </h1>
         </div>
 
-        {/* Breadcrumb Progress Indicator */}
         <div className="mb-8">
           <div className="flex items-center justify-center gap-2 text-sm">
             <span className={currentStep === 1 ? "font-medium text-primary" : currentStep > 1 ? "text-muted-foreground" : "text-muted-foreground"}>
@@ -128,12 +126,10 @@ export default function SlideshowForm({ initialData, currentStep, onStepChange }
           </div>
         </div>
 
-        {/* Form Card */}
         <Card className="p-8 shadow-lg">
           <div className="space-y-10">
             {currentStep === 1 && (
               <>
-                {/* Question 1 */}
                 <div className="space-y-3">
                   <Label htmlFor="promotion" className="text-lg font-medium">
                     What are you promoting?
@@ -151,7 +147,6 @@ export default function SlideshowForm({ initialData, currentStep, onStepChange }
                   <div className="text-right text-sm text-muted-foreground">{formData.promotion.length}/500</div>
                 </div>
 
-                {/* Question 2 */}
                 <div className="space-y-3">
                   <Label htmlFor="audience" className="text-lg font-medium">
                     Who is this for?
@@ -172,7 +167,6 @@ export default function SlideshowForm({ initialData, currentStep, onStepChange }
 
             {currentStep === 2 && (
               <>
-                {/* Question 3 */}
                 <div className="space-y-4">
                   <Label className="text-lg font-medium">What kind of images should we include?</Label>
                   <RadioGroup
@@ -251,7 +245,6 @@ export default function SlideshowForm({ initialData, currentStep, onStepChange }
                   </RadioGroup>
                 </div>
 
-                {/* Question 4 */}
                 <div className="space-y-3">
                   <Label htmlFor="tone" className="text-lg font-medium">
                     Tone/Vibe
@@ -269,7 +262,6 @@ export default function SlideshowForm({ initialData, currentStep, onStepChange }
                   </Select>
                 </div>
 
-                {/* Question 5 */}
                 <div className="space-y-3">
                   <Label htmlFor="cta" className="text-lg font-medium">
                     Call-to-action
@@ -283,7 +275,6 @@ export default function SlideshowForm({ initialData, currentStep, onStepChange }
                   />
                 </div>
 
-                {/* Question 6 */}
                 <div className="space-y-3">
                   <Label className="text-lg font-medium">How many slides?</Label>
                   <div className="space-y-4">
@@ -307,7 +298,6 @@ export default function SlideshowForm({ initialData, currentStep, onStepChange }
                   </div>
                 </div>
 
-                {/* Question 7 */}
                 <div className="space-y-4">
                   <Label className="text-lg font-medium">Template style</Label>
                   <Tabs value={formData.template} onValueChange={(value) => updateField("template", value)}>

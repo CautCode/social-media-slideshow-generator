@@ -3,7 +3,6 @@ import { z } from "zod"
 import { createSlideshowGraph } from "@/lib/langraph/slideshow-graph"
 import type { GenerateSlideshowRequest, GenerateSlideshowResponse } from "@/lib/types/slideshow"
 
-// Request validation schema
 const RequestSchema = z.object({
   promotion: z.string().min(1, "Promotion is required").max(500),
   audience: z.string().min(1, "Audience is required").max(100),
@@ -17,11 +16,9 @@ const RequestSchema = z.object({
 
 export async function POST(request: NextRequest) {
   try {
-    // Parse and validate request body
     const body = await request.json()
     const validatedData = RequestSchema.parse(body)
 
-    // Check for OpenAI API key
     if (!process.env.OPENAI_API_KEY) {
       console.error("OPENAI_API_KEY is not set")
       return NextResponse.json(
@@ -33,10 +30,8 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    // Create the LangGraph workflow
     const graph = createSlideshowGraph()
 
-    // Prepare form data for the graph
     const formData: GenerateSlideshowRequest = {
       promotion: validatedData.promotion,
       audience: validatedData.audience,
@@ -55,12 +50,10 @@ export async function POST(request: NextRequest) {
       template: formData.template,
     })
 
-    // Invoke the graph (now handles both content generation and image enrichment)
     const result = await graph.invoke({
       formData,
     })
 
-    // Check for errors in the graph execution
     if (result.error) {
       console.error("❌ Graph execution error:", result.error)
       return NextResponse.json(
@@ -73,7 +66,6 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    // Validate the response
     if (!result.slideshowContent) {
       console.error("❌ No slideshow content generated")
       return NextResponse.json(
@@ -85,11 +77,9 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    // Log the generated content (as requested)
     console.log("✅ Generated slideshow content:")
     console.log(JSON.stringify(result.slideshowContent, null, 2))
 
-    // Return success response
     return NextResponse.json(
       {
         success: true,
@@ -98,7 +88,6 @@ export async function POST(request: NextRequest) {
       { status: 200 }
     )
   } catch (error) {
-    // Handle validation errors
     if (error instanceof z.ZodError) {
       console.error("❌ Validation error:", error.errors)
       return NextResponse.json(
@@ -111,7 +100,6 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    // Handle other errors
     console.error("❌ Unexpected error in generate-slideshow API:", error)
     return NextResponse.json(
       {
@@ -124,7 +112,6 @@ export async function POST(request: NextRequest) {
   }
 }
 
-// Optional: Add GET handler to check API health
 export async function GET() {
   return NextResponse.json({
     status: "ok",
